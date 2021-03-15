@@ -1,0 +1,111 @@
+{
+    "pluginAlias": "HDLBusproHomebridge",
+    "pluginType": "platform",
+    "singular": true,
+    "schema": {
+        "definitions": {
+            "buses_obj": {
+                "type": "object",
+                "title": "Bus",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "ip": {
+                        "type": "string"
+                    },
+                    "port": {
+                        "type": "number"
+                    },
+                    "subnets": {
+                        "title": "Subnets (required—max 2)",
+                        "type": "array",
+                        "maxItems": 2,
+                        "items": {
+                            "$ref": "#/definitions/subnets_obj"
+                        }
+                    }
+                }
+            },
+            "subnets_obj": {
+                "type": "object",
+                "title": "Subnet",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "number": {
+                        "type": "number"
+                    },
+                    "cdn": {
+                        "type": "number",
+                        "title": "Control device number"
+                    },
+                    "devices": {
+                        "title": "Devices (required)",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/devices_obj"
+                        }
+                    }
+                }
+            },
+            "devices_obj": {
+                "type": "object",
+                "title": "Device",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "number": {
+                        "type": "number"
+                    },
+                    "specification": {
+                        "type": "string",
+                        "enum": ["Relay Lightbulb", "Relay Dimmable Lightbulb"]
+                    },
+                    "channels": {
+                        "title": "Channels (required—max 12)",
+                        "type": "array",
+                        "maxItems": 12,
+                        "items": {
+                            "$ref": "#/definitions/channels_obj"
+                        }
+                    }
+                }
+            },
+            "channels_obj": {
+                "type": "object",
+                "title": "Channel",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "number": {
+                        "type": "number",
+                        "title": "Number"
+                    }
+                }
+            }
+        },
+        "type": "object",
+        "properties": {
+            "name": {
+                "title": "Name",
+                "type": "string",
+                "default": "HDLBusproHomebridge",
+                "required": true
+            },
+            "buses": {
+                "title": "Buses (required—max 1)",
+                "type": "array",
+                "maxItems": 1,
+                "items": {
+                    "$ref": "#/definitions/buses_obj",
+                    "extendRefs": true
+                }
+            }
+        }
+    }
+}
