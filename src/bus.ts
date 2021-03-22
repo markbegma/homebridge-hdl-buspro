@@ -1,5 +1,5 @@
 import { HDLBusproHomebridge } from './platform';
-import Bus from 'smart-bus-mrgadget';
+import Bus from 'smart-bus';
 //HDLBusproHomebridge.config.name
 
 export class busser {
@@ -11,24 +11,24 @@ export class busser {
     private readonly port: number,
     private readonly subnet: number,
     private readonly control: number,
+    private readonly state: boolean,
     ) {
+      this.devicestr = String(subnet).concat('.', String(control));
+    }
 
-  this.devicestr = String(subnet).concat('.', String(control));
-}
-
-controldevice(): Bus {
-  const bus = new Bus({
-    device: this.devicestr,
-    gateway: this.ip,
-    port: this.port
-  });
+    controldevice(): Bus {
+      const bus = new Bus({
+        device: this.devicestr,
+        gateway: this.ip,
+        port: this.port
+      });
   return bus
 };
 
 }
 
 export const bus = new Bus({
-    device: "1.50",
-    gateway: '10.0.1.70', // HDL SmartBus gateway IP
-    port: 6000                // and port, default: 6000
+    device: '1.50',
+    gateway: '10.0.1.70',
+    port: 6000
   });

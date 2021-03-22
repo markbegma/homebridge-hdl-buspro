@@ -1,7 +1,7 @@
 import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from 'homebridge';
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
-import { RelayLightbulb, RelayDimmableLightbulb } from './platformAccessory';
+import { RelayLightbulb, RelayDimmableLightbulb, Sensor8in1 } from './platformAccessory';
 
 /**
  * HomebridgePlatform
@@ -89,7 +89,26 @@ export class HDLBusproHomebridge implements DynamicPlatformPlugin {
                 }
               };
               break;
-              case 'Relay Dimmable Lightbulb':
+            case 'Relay Dimmable Lightbulb':
+              for (const channel of device.channels) {
+                const channel_number = channel.number;
+                const channel_name = channel.name;
+                const UniqueID = String(ip).concat(':', String(port), '.', String(subnet_number), '.', String(device_number), '.', String(channel_number));
+                const uuid = this.api.hap.uuid.generate(UniqueID);
+                const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
+                if (existingAccessory) {
+                  this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
+                   new RelayDimmableLightbulb(this, existingAccessory, channel_name, ip, port, cdn, subnet_number, device_number, channel_number);
+                } else {
+                  this.log.info('Adding new accessory:', channel_name);
+                  const accessory = new this.api.platformAccessory(channel_name, uuid);
+                  //accessory.context.device = device;
+                  new RelayDimmableLightbulb(this, accessory, channel_name, ip, port, cdn, subnet_number, device_number, channel_number);
+                  this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+                }
+              };
+              break;
+              case 'Sensor 8 in 1':
                 for (const channel of device.channels) {
                   const channel_number = channel.number;
                   const channel_name = channel.name;
@@ -98,12 +117,12 @@ export class HDLBusproHomebridge implements DynamicPlatformPlugin {
                   const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
                   if (existingAccessory) {
                     this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
-                    new RelayDimmableLightbulb(this, existingAccessory, channel_name, ip, port, cdn, subnet_number, device_number, channel_number);
+                     new Sensor8in1(this, existingAccessory, channel_name, ip, port, cdn, subnet_number, device_number);
                   } else {
                     this.log.info('Adding new accessory:', channel_name);
                     const accessory = new this.api.platformAccessory(channel_name, uuid);
                     //accessory.context.device = device;
-                    new RelayDimmableLightbulb(this, accessory, channel_name, ip, port, cdn, subnet_number, device_number, channel_number);
+                    new Sensor8in1(this, accessory, channel_name, ip, port, cdn, subnet_number, device_number);
                     this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
                   }
                 };

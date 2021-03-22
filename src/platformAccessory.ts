@@ -1,7 +1,7 @@
 import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
 
 import { HDLBusproHomebridge } from './platform';
-import Bus from 'smart-bus-mrgadget';
+import Bus from 'smart-bus';
 
 export class RelayLightbulb {
   private service: Service;
@@ -41,23 +41,43 @@ export class RelayLightbulb {
 
   async setOn(value: CharacteristicValue) {
     this.RelayLightbulbStates.On = value as boolean;
-    this.bus.send(this.bus.device(this.devicestr), 0x0031, { channel: this.channel, level: (+this.RelayLightbulbStates.On * 100)}, function(err) {});
+    this.bus.send({
+      sender: this.cdnstr,
+      target: this.devicestr,
+      command: 0x0031,
+      data: { channel: this.channel, level: (+this.RelayLightbulbStates.On * 100) }
+    }, function(err) {});
   }
 
-  async getOn(): Promise<CharacteristicValue> {
-    this.bus.device(this.devicestr).channel(this.channel).on('status', function() {});
-    const isOn = (this.bus.device(this.devicestr).channel(this.channel).level > 0);
-    this.platform.log.debug('Get Characteristic On ->', isOn);
+  async OnListener()  {
+    let on = await new this.bus.device(this.devicestr).on(0x0032, function(command) {
+      let data = command.data;
+      let success = data.success;
+      let channel = data.channel;
+      let level = data.level;
 
+      if (level) {
+        return level;
+      } else {
+        return false;
+      };
+    });
+    this.RelayLightbulbStates.On = (on > 0);
+  }
+
+
+  async getOn(): Promise<CharacteristicValue> {
+    let isOn = this.RelayLightbulbStates.On;
+    this.platform.log.debug('Get Characteristic On ->', isOn);
     return isOn;
   }
 }
 
 export class RelayDimmableLightbulb {
   private service: Service;
-  private RelayDimmingLightbulbStates = {
+  private RelayDimmableLightbulbStates = {
     On: false,
-    Brightness: 100,
+    Brightness: 0,
   };
   private cdnstr: string;
   private devicestr: string;
@@ -93,32 +113,134 @@ export class RelayDimmableLightbulb {
     });
   }
 
+  async OnListener()  {
+    let on = await new this.bus.device(this.devicestr).on(0x0032, function(command) {
+      let data = command.data;
+      let success = data.success;
+      let channel = data.channel;
+      let level = data.level;
+
+      if (level) {
+        return level;
+      } else {
+        return false;
+      };
+    });
+    this.RelayDimmableLightbulbStates.On = (on > 0);
+    this.RelayDimmableLightbulbStates.Brightness = on;
+  }
+
   async setOn(value: CharacteristicValue) {
-    this.RelayDimmingLightbulbStates.On = value as boolean;
-    this.bus.send(this.bus.device(this.devicestr), 0x0031, { channel: this.channel, level: (+this.RelayDimmingLightbulbStates.On * 100)}, function(err) {});
+    this.RelayDimmableLightbulbStates.On = value as boolean;
+    this.bus.send({
+      sender: this.cdnstr,
+      target: this.devicestr,
+      command: 0x0031,
+      data: { channel: this.channel, level: (+this.RelayDimmableLightbulbStates.On * 100) }
+    }, function(err) {});
   }
 
   async getOn(): Promise<CharacteristicValue> {
-    this.bus.device(this.devicestr).channel(this.channel).on('status', function() {});
-    const isOn = (this.bus.device(this.devicestr).channel(this.channel).level > 0);
+    let isOn = this.RelayDimmableLightbulbStates.On;
     this.platform.log.debug('Get Characteristic On ->', isOn);
-
     return isOn;
   }
 
   async setBrightness(value: CharacteristicValue) {
-    // implement your own code to set the brightness
-    this.RelayDimmingLightbulbStates.Brightness = value as number;
-    this.bus.send(this.bus.device(this.devicestr), 0x0031, { channel: this.channel, level: this.RelayDimmingLightbulbStates.Brightness}, function(err) {});
-    this.platform.log.debug('Set Characteristic Brightness -> ', value);
+    this.RelayDimmableLightbulbStates.Brightness = value as number;
+    this.bus.send({
+      sender: this.cdnstr,
+      target: this.devicestr,
+      command: 0x0031,
+      data: { channel: this.channel, level: this.RelayDimmableLightbulbStates.Brightness }
+    }, function(err) {});
   }
 
   async getBrightness(): Promise<CharacteristicValue> {
-    let Brightness = 0;
-    this.bus.device(this.devicestr).channel(this.channel).on('status', function() {});
-    Brightness = this.bus.device(this.devicestr).channel(this.channel).level as number;
-    this.platform.log.debug('Get Characteristic On ->', Brightness);
-
+    let Brightness = this.RelayDimmableLightbulbStates.Brightness;
+    this.platform.log.debug('Get Characteristic Brightness ->', Brightness);
     return Brightness;
   }
+}
+
+export class Sensor8in1 {
+  private temp_service: Service;
+  /*
+  private brig_service: Service;
+  private mot_service: Service;
+  private snd_service: Service;
+  */
+  private SensorStates = {
+    Temperature: 0,
+    Brightness: 0,
+    Sound: false,
+    Motion: false,
+  };
+  private cdnstr: string;
+  private devicestr: string;
+  private bus: Bus;
+
+  constructor(
+    private readonly platform: HDLBusproHomebridge,
+    private readonly accessory: PlatformAccessory,
+    private readonly temp_name: string,
+    private readonly ip: string,
+    private readonly port: number,
+    private readonly control: number,
+    private readonly subnet: number,
+    private readonly device: number,
+  ) {
+    this.accessory.getService(this.platform.Service.AccessoryInformation)!
+      .setCharacteristic(this.platform.Characteristic.Manufacturer, 'HDL');
+
+
+    this.temp_service = this.accessory.getService(this.platform.Service.TemperatureSensor) || this.accessory.addService(this.platform.Service.TemperatureSensor);
+    this.temp_service.setCharacteristic(this.platform.Characteristic.Name, temp_name);
+    this.temp_service.getCharacteristic(this.platform.Characteristic.CurrentTemperature)
+      .onGet(this.handleCurrentTemperatureGet.bind(this));
+    this.cdnstr = String(subnet).concat('.', String(control));
+    this.devicestr = String(subnet).concat('.', String(device));
+    this.bus = new Bus({
+      device: this.cdnstr,
+      gateway: this.ip,
+      port: this.port
+    });
+
+    setInterval(() => {
+      this.platform.log.debug('asking for update');
+      this.bus.send({
+        sender: this.cdnstr,
+        target: this.devicestr,
+        command: 0x1645
+      }, function(err) {});
+    }, 10000);
+  }
+
+  async sensorUpdater()  {
+    this.platform.log.debug('updating');
+    let sensordata = await this.bus.device(this.devicestr).on(0x1646, function(command) {
+      let data = command.data;
+      let temperature = data.temperature;
+      //this.SensorStates.Temperature = temperature;
+      if (data) {
+        return data;
+      } else {
+        return false;
+      };
+    });
+    this.SensorStates.Temperature = sensordata.temperature;
+    this.temp_service.getCharacteristic(this.platform.Characteristic.CurrentTemperature).updateValue(this.SensorStates.Temperature);
+  }
+
+  async handleCurrentTemperatureGet(): Promise<CharacteristicValue> {
+    this.bus.send({
+      sender: this.cdnstr,
+      target: this.devicestr,
+      command: 0x1645
+    }, function(err) {});
+    let temp = this.SensorStates.Temperature;
+    this.platform.log.debug('Get Characteristic Temperature ->', temp);
+    return temp;
+  }
+
 }
