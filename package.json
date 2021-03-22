@@ -1,8 +1,8 @@
 {
-  "private": true,
+  "private": false,
   "displayName": "HDLBuspro",
   "name": "homebridge-hdl-buspro",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Linking the HDL bus into the Homebridge widget",
   "license": "Apache-2.0",
   "repository": {
@@ -26,7 +26,7 @@
   "keywords": [
     "homebridge-plugin", "hdl", "buspro"
   ],
-  "dependencies": {"smart-bus-mrgadget": "0.5.4"},
+  "dependencies": {"smart-bus": "0.6.0"},
   "devDependencies": {
     "@types/node": "^14.14.31",
     "@typescript-eslint/eslint-plugin": "^4.16.1",

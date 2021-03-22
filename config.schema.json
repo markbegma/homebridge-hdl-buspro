@@ -62,7 +62,7 @@
                     },
                     "specification": {
                         "type": "string",
-                        "enum": ["Relay Lightbulb", "Relay Dimmable Lightbulb"]
+                        "enum": ["Relay Lightbulb", "Relay Dimmable Lightbulb", "Sensor 8 in 1"]
                     },
                     "channels": {
                         "title": "Channels (required—max 12)",
