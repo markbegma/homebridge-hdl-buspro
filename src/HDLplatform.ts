@@ -77,20 +77,16 @@ export class HDLBusproHomebridge implements DynamicPlatformPlugin {
               break;
             case 'Sensor 8 in 1':
               const device_name = device.name;
-              const temp_name = device.sensor.temp_name;
-              const brightness_name = device.sensor.brightness_name;
-              const motion_name = device.sensor.motion_name;
-              const sound_name = device.sensor.sound_name;
               const UniqueID = String(ip).concat(':', String(port), '.', String(subnet_number), '.', String(device_number));
               const uuid = this.api.hap.uuid.generate(UniqueID);
               const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
               if (existingAccessory) {
                 this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
-                new Sensor8in1(this, existingAccessory, temp_name, brightness_name, motion_name, sound_name, ip, port, cdn, subnet_number, device_number);
+                new Sensor8in1(this, existingAccessory, device_name, ip, port, cdn, subnet_number, device_number);
               } else {
                 this.log.info('Adding new accessoriy:', device_name);
                 const accessory = new this.api.platformAccessory(device_name, uuid);
-                new Sensor8in1(this, accessory, temp_name, brightness_name, motion_name, sound_name, ip, port, cdn, subnet_number, device_number);
+                new Sensor8in1(this, accessory, device_name, ip, port, cdn, subnet_number, device_number);
                 this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
               }
               break;

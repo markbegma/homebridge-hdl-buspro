@@ -48,7 +48,9 @@ export class RelayDimmableLightbulb {
       let level = data.level;
       if (channel == that.channel) {
         that.RelayDimmableLightbulbStates.On = (level > 0);
+        that.service.getCharacteristic(that.platform.Characteristic.On).updateValue(that.RelayDimmableLightbulbStates.On);
         that.RelayDimmableLightbulbStates.Brightness = level;
+        that.service.getCharacteristic(that.platform.Characteristic.Brightness).updateValue(that.RelayDimmableLightbulbStates.Brightness);
         if (that.RelayDimmableLightbulbStates.On) {
           that.platform.log.debug(that.lightname + ' is now on with brightness ' + that.RelayDimmableLightbulbStates.Brightness);
         } else {

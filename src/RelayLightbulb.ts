@@ -45,6 +45,7 @@ export class RelayLightbulb {
       let level = data.level;
       if (channel == that.channel) {
         that.RelayLightbulbStates.On = (level > 0);
+        that.service.getCharacteristic(that.platform.Characteristic.On).updateValue(that.RelayLightbulbStates.On);
         if (that.RelayLightbulbStates.On) {
           that.platform.log.debug(that.lightname + ' is now on');
         } else {

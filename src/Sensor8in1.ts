@@ -22,10 +22,7 @@ export class Sensor8in1 {
     constructor(
         private readonly platform: HDLBusproHomebridge,
         private readonly accessory: PlatformAccessory,
-        private readonly temp_name: string,
-        private readonly brightness_name: string,
-        private readonly motion_name: string,
-        private readonly sound_name: string,
+        private readonly device_name: string,
         private readonly ip: string,
         private readonly port: number,
         private readonly control: number,
@@ -37,22 +34,18 @@ export class Sensor8in1 {
 
 
         this.temp_service = this.accessory.getService(this.platform.Service.TemperatureSensor) || this.accessory.addService(this.platform.Service.TemperatureSensor);
-        this.temp_service.setCharacteristic(this.platform.Characteristic.Name, this.temp_name);
         this.temp_service.getCharacteristic(this.platform.Characteristic.CurrentTemperature)
             .onGet(this.handleCurrentTemperatureGet.bind(this));
 
         this.brightness_service = this.accessory.getService(this.platform.Service.LightSensor) || this.accessory.addService(this.platform.Service.LightSensor);
-        this.brightness_service.setCharacteristic(this.platform.Characteristic.Name, this.brightness_name);
         this.brightness_service.getCharacteristic(this.platform.Characteristic.CurrentAmbientLightLevel)
             .onGet(this.handleCurrentAmbientLightLevelGet.bind(this));
 
         this.motion_service = this.accessory.getService(this.platform.Service.MotionSensor) || this.accessory.addService(this.platform.Service.MotionSensor);
-        this.motion_service.setCharacteristic(this.platform.Characteristic.Name, this.motion_name);
         this.motion_service.getCharacteristic(this.platform.Characteristic.MotionDetected)
             .onGet(this.handleMotionDetectedGet.bind(this));
 
         this.sound_service = this.accessory.getService(this.platform.Service.Microphone) || this.accessory.addService(this.platform.Service.Microphone);
-        this.sound_service.setCharacteristic(this.platform.Characteristic.Name, this.sound_name);
         this.sound_service.getCharacteristic(this.platform.Characteristic.Mute)
             .onGet(this.handleMuteGet.bind(this));
 
@@ -96,7 +89,7 @@ export class Sensor8in1 {
             target: this.devicestr,
             command: 0x1645
         }, function (err) { });
-        this.platform.log.debug(this.temp_name + ' updated temperature is ', this.SensorStates.Temperature);
+        this.platform.log.debug(this.device_name + ' updated temperature is ', this.SensorStates.Temperature);
         return this.SensorStates.Temperature;
     }
 
@@ -106,7 +99,7 @@ export class Sensor8in1 {
             target: this.devicestr,
             command: 0x1645
         }, function (err) { });
-        this.platform.log.debug(this.brightness_name +  ' updated brightness is ', this.SensorStates.Brightness);
+        this.platform.log.debug(this.device_name +  ' updated brightness is ', this.SensorStates.Brightness);
         return this.SensorStates.Brightness;
     }
 
@@ -116,7 +109,7 @@ export class Sensor8in1 {
             target: this.devicestr,
             command: 0x1645
         }, function (err) { });
-        this.platform.log.debug(this.motion_name + ' motion status = ', this.SensorStates.Motion);
+        this.platform.log.debug(this.device_name + ' motion status = ', this.SensorStates.Motion);
         return this.SensorStates.Motion;
     }
 
@@ -126,7 +119,7 @@ export class Sensor8in1 {
             target: this.devicestr,
             command: 0x1645
         }, function (err) { });
-        this.platform.log.debug(this.sound_name + ' mute status = ', this.SensorStates.Sound);
+        this.platform.log.debug(this.device_name + ' mute status = ', this.SensorStates.Sound);
         return this.SensorStates.Sound;
     }
 
