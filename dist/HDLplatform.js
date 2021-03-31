@@ -103,4 +103,4 @@ class HDLBusproHomebridge {
     }
 }
 exports.HDLBusproHomebridge = HDLBusproHomebridge;
-//# sourceMappingURL=HDLplatform.js.map
+//# sourceMappingURL=HDLPlatform.js.map

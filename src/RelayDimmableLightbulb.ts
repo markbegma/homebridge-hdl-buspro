@@ -1,6 +1,6 @@
 import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
 
-import { HDLBusproHomebridge } from './HDLPlatform';
+import { HDLBusproHomebridge } from 'homebridge-hdl-buspro/src/HDLPlatform';
 import Bus from 'smart-bus';
 
 export class RelayDimmableLightbulb {

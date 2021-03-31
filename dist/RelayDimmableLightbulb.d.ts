@@ -1,5 +1,5 @@
 import { PlatformAccessory, CharacteristicValue } from 'homebridge';
-import { HDLBusproHomebridge } from './HDLPlatform';
+import { HDLBusproHomebridge } from 'homebridge-hdl-buspro/src/HDLPlatform';
 export declare class RelayDimmableLightbulb {
     private readonly platform;
     private readonly accessory;

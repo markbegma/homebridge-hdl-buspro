@@ -1,6 +1,6 @@
 import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
 
-import { HDLBusproHomebridge } from './HDLPlatform';
+import { HDLBusproHomebridge } from 'homebridge-hdl-buspro/src/HDLPlatform';
 import Bus from 'smart-bus';
 
 export class Sensor8in1 {
@@ -71,8 +71,8 @@ export class Sensor8in1 {
             that.SensorStates.Temperature = data.temperature;
             that.temp_service.getCharacteristic(that.platform.Characteristic.CurrentTemperature).updateValue(data.temperature);
 
-            that.SensorStates.Brightness = data.brightness + 0.001;
-            that.brightness_service.getCharacteristic(that.platform.Characteristic.CurrentAmbientLightLevel).updateValue(data.brightness + 0.001);
+            that.SensorStates.Brightness = data.brightness;
+            that.brightness_service.getCharacteristic(that.platform.Characteristic.CurrentAmbientLightLevel).updateValue(data.brightness);
 
             that.SensorStates.Motion = data.movement;
             that.motion_service.getCharacteristic(that.platform.Characteristic.MotionDetected).updateValue(data.movement);

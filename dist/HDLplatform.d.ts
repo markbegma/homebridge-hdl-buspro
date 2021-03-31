@@ -10,4 +10,4 @@ export declare class HDLBusproHomebridge implements DynamicPlatformPlugin {
     configureAccessory(accessory: PlatformAccessory): void;
     discoverDevices(): void;
 }
-//# sourceMappingURL=HDLplatform.d.ts.map
+//# sourceMappingURL=HDLPlatform.d.ts.map
