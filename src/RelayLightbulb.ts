@@ -8,6 +8,7 @@ export class RelayLightbulb {
   private RelayLightbulbStates = {
     On: false,
   };
+
   private cdnstr: string;
   private devicestr: string;
   private bus: Bus;
@@ -35,15 +36,16 @@ export class RelayLightbulb {
     this.bus = new Bus({
       device: this.cdnstr,
       gateway: this.ip,
-      port: this.port
+      port: this.port,
     });
 
-    let that = this;
-    this.bus.device(this.devicestr).on(0x0032, function (command) {
-      let data = command.data;
-      let channel = data.channel;
-      let level = data.level;
-      if (channel == that.channel) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const that = this;
+    this.bus.device(this.devicestr).on(0x0032, (command) => {
+      const data = command.data;
+      const channel = data.channel;
+      const level = data.level;
+      if (channel === that.channel) {
         that.RelayLightbulbStates.On = (level > 0);
         that.service.getCharacteristic(that.platform.Characteristic.On).updateValue(that.RelayLightbulbStates.On);
         if (that.RelayLightbulbStates.On) {
@@ -51,7 +53,7 @@ export class RelayLightbulb {
         } else {
           that.platform.log.debug(that.lightname + ' is now off');
         }
-      };
+      }
     });
   }
 
@@ -61,8 +63,8 @@ export class RelayLightbulb {
       sender: this.cdnstr,
       target: this.devicestr,
       command: 0x0031,
-      data: { channel: this.channel, level: (+this.RelayLightbulbStates.On * 100) }
-    }, function (err) { });
+      data: { channel: this.channel, level: (+this.RelayLightbulbStates.On * 100) },
+    }, false);
   }
 
 

@@ -9,6 +9,7 @@ export class RelayDimmableLightbulb {
     On: false,
     Brightness: 0,
   };
+
   private cdnstr: string;
   private devicestr: string;
   private bus: Bus;
@@ -39,14 +40,15 @@ export class RelayDimmableLightbulb {
     this.bus = new Bus({
       device: this.cdnstr,
       gateway: this.ip,
-      port: this.port
+      port: this.port,
     });
 
-    let that = this;
-    this.bus.device(this.devicestr).on(0x0032, function (command) {
-      let data = command.data;
-      let level = data.level;
-      if (channel == that.channel) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const that = this;
+    this.bus.device(this.devicestr).on(0x0032, (command) => {
+      const data = command.data;
+      const level = data.level;
+      if (channel === that.channel) {
         that.RelayDimmableLightbulbStates.On = (level > 0);
         that.service.getCharacteristic(that.platform.Characteristic.On).updateValue(that.RelayDimmableLightbulbStates.On);
         that.RelayDimmableLightbulbStates.Brightness = level;
@@ -66,8 +68,8 @@ export class RelayDimmableLightbulb {
       sender: this.cdnstr,
       target: this.devicestr,
       command: 0x0031,
-      data: { channel: this.channel, level: (+this.RelayDimmableLightbulbStates.On * 100) }
-    }, function (err) { });
+      data: { channel: this.channel, level: (+this.RelayDimmableLightbulbStates.On * 100) },
+    }, false);
   }
 
   async getOn(): Promise<CharacteristicValue> {
@@ -80,8 +82,8 @@ export class RelayDimmableLightbulb {
       sender: this.cdnstr,
       target: this.devicestr,
       command: 0x0031,
-      data: { channel: this.channel, level: this.RelayDimmableLightbulbStates.Brightness }
-    }, function (err) { });
+      data: { channel: this.channel, level: this.RelayDimmableLightbulbStates.Brightness },
+    }, false);
   }
 
   async getBrightness(): Promise<CharacteristicValue> {

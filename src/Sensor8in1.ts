@@ -10,11 +10,12 @@ export class Sensor8in1 {
     private sound_service: Service;
 
     private SensorStates = {
-        Temperature: 0,
-        Brightness: 0.001,
-        Motion: false,
-        Sound: false,
+      Temperature: 0,
+      Brightness: 0.001,
+      Motion: false,
+      Sound: false,
     };
+
     private cdnstr: string;
     private devicestr: string;
     private bus: Bus;
@@ -30,97 +31,102 @@ export class Sensor8in1 {
         private readonly device: number,
     ) {
         this.accessory.getService(this.platform.Service.AccessoryInformation)!
-            .setCharacteristic(this.platform.Characteristic.Manufacturer, 'HDL');
+          .setCharacteristic(this.platform.Characteristic.Manufacturer, 'HDL');
 
 
-        this.temp_service = this.accessory.getService(this.platform.Service.TemperatureSensor) || this.accessory.addService(this.platform.Service.TemperatureSensor);
+        this.temp_service = this.accessory.getService(this.platform.Service.TemperatureSensor) ||
+        this.accessory.addService(this.platform.Service.TemperatureSensor);
         this.temp_service.getCharacteristic(this.platform.Characteristic.CurrentTemperature)
-            .onGet(this.handleCurrentTemperatureGet.bind(this));
+          .onGet(this.handleCurrentTemperatureGet.bind(this));
 
-        this.brightness_service = this.accessory.getService(this.platform.Service.LightSensor) || this.accessory.addService(this.platform.Service.LightSensor);
+        this.brightness_service = this.accessory.getService(this.platform.Service.LightSensor) ||
+        this.accessory.addService(this.platform.Service.LightSensor);
         this.brightness_service.getCharacteristic(this.platform.Characteristic.CurrentAmbientLightLevel)
-            .onGet(this.handleCurrentAmbientLightLevelGet.bind(this));
+          .onGet(this.handleCurrentAmbientLightLevelGet.bind(this));
 
-        this.motion_service = this.accessory.getService(this.platform.Service.MotionSensor) || this.accessory.addService(this.platform.Service.MotionSensor);
+        this.motion_service = this.accessory.getService(this.platform.Service.MotionSensor) ||
+        this.accessory.addService(this.platform.Service.MotionSensor);
         this.motion_service.getCharacteristic(this.platform.Characteristic.MotionDetected)
-            .onGet(this.handleMotionDetectedGet.bind(this));
+          .onGet(this.handleMotionDetectedGet.bind(this));
 
-        this.sound_service = this.accessory.getService(this.platform.Service.Microphone) || this.accessory.addService(this.platform.Service.Microphone);
+        this.sound_service = this.accessory.getService(this.platform.Service.Microphone) ||
+        this.accessory.addService(this.platform.Service.Microphone);
         this.sound_service.getCharacteristic(this.platform.Characteristic.Mute)
-            .onGet(this.handleMuteGet.bind(this));
+          .onGet(this.handleMuteGet.bind(this));
 
         this.cdnstr = String(subnet).concat('.', String(control));
         this.devicestr = String(subnet).concat('.', String(device));
         this.bus = new Bus({
-            device: this.cdnstr,
-            gateway: this.ip,
-            port: this.port
+          device: this.cdnstr,
+          gateway: this.ip,
+          port: this.port,
         });
 
-        let that = this;
-        this.bus.device(this.devicestr).on(0x1646, function (command) {
-            let data = command.data;
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        const that = this;
+        this.bus.device(this.devicestr).on(0x1646, (command) => {
+          const data = command.data;
 
-            that.SensorStates.Temperature = data.temperature;
-            that.temp_service.getCharacteristic(that.platform.Characteristic.CurrentTemperature).updateValue(data.temperature);
+          that.SensorStates.Temperature = data.temperature;
+          that.temp_service.getCharacteristic(that.platform.Characteristic.CurrentTemperature).updateValue(data.temperature);
 
-            that.SensorStates.Brightness = data.brightness;
-            that.brightness_service.getCharacteristic(that.platform.Characteristic.CurrentAmbientLightLevel).updateValue(data.brightness);
+          that.SensorStates.Brightness = data.brightness;
+          that.brightness_service.getCharacteristic(that.platform.Characteristic.CurrentAmbientLightLevel).updateValue(data.brightness);
 
-            that.SensorStates.Motion = data.movement;
-            that.motion_service.getCharacteristic(that.platform.Characteristic.MotionDetected).updateValue(data.movement);
+          that.SensorStates.Motion = data.movement;
+          that.motion_service.getCharacteristic(that.platform.Characteristic.MotionDetected).updateValue(data.movement);
 
-            that.SensorStates.Sound = !data.sonic;
-            that.sound_service.getCharacteristic(that.platform.Characteristic.Mute).updateValue(!data.sonic);
+          that.SensorStates.Sound = !data.sonic;
+          that.sound_service.getCharacteristic(that.platform.Characteristic.Mute).updateValue(!data.sonic);
         });
 
         setInterval(() => {
-            this.bus.send({
-                sender: this.cdnstr,
-                target: this.devicestr,
-                command: 0x1645
-            }, function (err) { });
+          this.bus.send({
+            sender: this.cdnstr,
+            target: this.devicestr,
+            command: 0x1645,
+          }, false);
         }, 1000);
     }
 
     async handleCurrentTemperatureGet(): Promise<CharacteristicValue> {
-        this.bus.send({
-            sender: this.cdnstr,
-            target: this.devicestr,
-            command: 0x1645
-        }, function (err) { });
-        this.platform.log.debug(this.device_name + ' updated temperature is ', this.SensorStates.Temperature);
-        return this.SensorStates.Temperature;
+      this.bus.send({
+        sender: this.cdnstr,
+        target: this.devicestr,
+        command: 0x1645,
+      }, false);
+      this.platform.log.debug(this.device_name + ' updated temperature is ', this.SensorStates.Temperature);
+      return this.SensorStates.Temperature;
     }
 
     async handleCurrentAmbientLightLevelGet(): Promise<CharacteristicValue> {
-        this.bus.send({
-            sender: this.cdnstr,
-            target: this.devicestr,
-            command: 0x1645
-        }, function (err) { });
-        this.platform.log.debug(this.device_name +  ' updated brightness is ', this.SensorStates.Brightness);
-        return this.SensorStates.Brightness;
+      this.bus.send({
+        sender: this.cdnstr,
+        target: this.devicestr,
+        command: 0x1645,
+      }, false);
+      this.platform.log.debug(this.device_name + ' updated brightness is ', this.SensorStates.Brightness);
+      return this.SensorStates.Brightness;
     }
 
     async handleMotionDetectedGet(): Promise<CharacteristicValue> {
-        this.bus.send({
-            sender: this.cdnstr,
-            target: this.devicestr,
-            command: 0x1645
-        }, function (err) { });
-        this.platform.log.debug(this.device_name + ' motion status = ', this.SensorStates.Motion);
-        return this.SensorStates.Motion;
+      this.bus.send({
+        sender: this.cdnstr,
+        target: this.devicestr,
+        command: 0x1645,
+      }, false);
+      this.platform.log.debug(this.device_name + ' motion status = ', this.SensorStates.Motion);
+      return this.SensorStates.Motion;
     }
 
     async handleMuteGet(): Promise<CharacteristicValue> {
-        this.bus.send({
-            sender: this.cdnstr,
-            target: this.devicestr,
-            command: 0x1645
-        }, function (err) { });
-        this.platform.log.debug(this.device_name + ' mute status = ', this.SensorStates.Sound);
-        return this.SensorStates.Sound;
+      this.bus.send({
+        sender: this.cdnstr,
+        target: this.devicestr,
+        command: 0x1645,
+      }, false);
+      this.platform.log.debug(this.device_name + ' mute status = ', this.SensorStates.Sound);
+      return this.SensorStates.Sound;
     }
 
 }
