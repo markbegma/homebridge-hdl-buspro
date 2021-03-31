@@ -15,7 +15,8 @@
                         "type": "string"
                     },
                     "port": {
-                        "type": "number"
+                        "type": "number",
+                        "default": 6000
                     },
                     "subnets": {
                         "title": "Subnets (required—max 2)",
@@ -71,6 +72,13 @@
                         "items": {
                             "$ref": "#/definitions/channels_obj"
                         }
+                    },
+                    "sensor": {
+                        "title": "Sensor names",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/sensornames_obj"
+                        }
                     }
                 }
             },
@@ -85,6 +93,32 @@
                     "number": {
                         "type": "number",
                         "title": "Number"
+                    }
+                }
+            },
+            "sensornames_obj": {
+                "type": "object",
+                "title": "Sensor names",
+                "properties": {
+                    "temp_name": {
+                        "type": "string",
+                        "title": "Temperature name",
+                        "default": "Temperature sensor"
+                    },
+                    "brightness_name": {
+                        "type": "string",
+                        "title": "Brightness name",
+                        "default": "Brightness sensor"
+                    },
+                    "motion_name": {
+                        "type": "string",
+                        "title": "Motion name",
+                        "default": "Motion sensor"
+                    },
+                    "sound_name": {
+                        "type": "string",
+                        "title": "Sound name",
+                        "default": "Sound sensor"
                     }
                 }
             }

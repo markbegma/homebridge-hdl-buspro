@@ -1,7 +1,7 @@
 import { API } from 'homebridge';
 
 import { PLATFORM_NAME } from './settings';
-import { HDLBusproHomebridge } from './platform';
+import { HDLBusproHomebridge } from './HDLPlatform';
 
 /**
  * This method registers the platform with Homebridge
