@@ -70,8 +70,9 @@ export class Sensor8in1 {
           that.SensorStates.Temperature = data.temperature;
           that.temp_service.getCharacteristic(that.platform.Characteristic.CurrentTemperature).updateValue(data.temperature);
 
-          that.SensorStates.Brightness = data.brightness;
-          that.brightness_service.getCharacteristic(that.platform.Characteristic.CurrentAmbientLightLevel).updateValue(data.brightness);
+          that.SensorStates.Brightness = data.brightness+0.001;
+          // eslint-disable-next-line max-len
+          that.brightness_service.getCharacteristic(that.platform.Characteristic.CurrentAmbientLightLevel).updateValue(data.brightness+0.001);
 
           that.SensorStates.Motion = data.movement;
           that.motion_service.getCharacteristic(that.platform.Characteristic.MotionDetected).updateValue(data.movement);
