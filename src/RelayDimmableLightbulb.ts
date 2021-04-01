@@ -48,6 +48,7 @@ export class RelayDimmableLightbulb {
     this.bus.device(this.devicestr).on(0x0032, (command) => {
       const data = command.data;
       const level = data.level;
+      const channel = data.channel;
       if (channel === that.channel) {
         that.RelayDimmableLightbulbStates.On = (level > 0);
         that.service.getCharacteristic(that.platform.Characteristic.On).updateValue(that.RelayDimmableLightbulbStates.On);
