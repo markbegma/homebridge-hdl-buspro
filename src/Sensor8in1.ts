@@ -16,9 +16,9 @@ export class Sensor8in1 {
       Sound: false,
     };
 
+    private bus: Bus;
     private cdnstr: string;
     private devicestr: string;
-    private bus: Bus;
 
     constructor(
         private readonly platform: HDLBusproHomebridge,
@@ -26,9 +26,9 @@ export class Sensor8in1 {
         private readonly device_name: string,
         private readonly ip: string,
         private readonly port: number,
-        private readonly control: number,
         private readonly subnet: number,
-        private readonly device: number,
+        private readonly cdn: string,
+        private readonly device: string,
     ) {
         this.accessory.getService(this.platform.Service.AccessoryInformation)!
           .setCharacteristic(this.platform.Characteristic.Manufacturer, 'HDL');
@@ -53,8 +53,7 @@ export class Sensor8in1 {
         this.accessory.addService(this.platform.Service.Microphone);
         this.sound_service.getCharacteristic(this.platform.Characteristic.Mute)
           .onGet(this.handleMuteGet.bind(this));
-
-        this.cdnstr = String(subnet).concat('.', String(control));
+        this.cdnstr = String(subnet).concat('.', String(cdn));
         this.devicestr = String(subnet).concat('.', String(device));
         this.bus = new Bus({
           device: this.cdnstr,

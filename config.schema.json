@@ -3,110 +3,205 @@
     "pluginType": "platform",
     "singular": true,
     "schema": {
-        "definitions": {
-            "buses_obj": {
-                "type": "object",
-                "title": "Bus",
-                "properties": {
-                    "name": {
-                        "type": "string"
-                    },
-                    "ip": {
-                        "type": "string"
-                    },
-                    "port": {
-                        "type": "number",
-                        "default": 6000
-                    },
-                    "subnets": {
-                        "title": "Subnets (required—max 2)",
-                        "type": "array",
-                        "maxItems": 2,
-                        "items": {
-                            "$ref": "#/definitions/subnets_obj"
-                        }
-                    }
-                }
-            },
-            "subnets_obj": {
-                "type": "object",
-                "title": "Subnet",
-                "properties": {
-                    "name": {
-                        "type": "string"
-                    },
-                    "number": {
-                        "type": "number"
-                    },
-                    "cdn": {
-                        "type": "number",
-                        "title": "Control device number"
-                    },
-                    "devices": {
-                        "title": "Devices (required)",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/definitions/devices_obj"
-                        }
-                    }
-                }
-            },
-            "devices_obj": {
-                "type": "object",
-                "title": "Device",
-                "properties": {
-                    "name": {
-                        "type": "string"
-                    },
-                    "number": {
-                        "type": "number"
-                    },
-                    "specification": {
-                        "type": "string",
-                        "enum": ["Relay Lightbulb", "Relay Dimmable Lightbulb", "Sensor 8 in 1"]
-                    },
-                    "channels": {
-                        "title": "Channels (required—max 12)",
-                        "type": "array",
-                        "maxItems": 12,
-                        "items": {
-                            "$ref": "#/definitions/channels_obj"
-                        }
-                    }
-                }
-            },
-            "channels_obj": {
-                "type": "object",
-                "title": "Channel",
-                "properties": {
-                    "name": {
-                        "type": "string",
-                        "title": "Name"
-                    },
-                    "number": {
-                        "type": "number",
-                        "title": "Number"
-                    }
-                }
-            }
-        },
         "type": "object",
         "properties": {
-            "name": {
-                "title": "Name",
-                "type": "string",
-                "default": "HDLBusproHomebridge",
-                "required": true
-            },
             "buses": {
-                "title": "Buses (required—max 1)",
+                "title": "Buses",
                 "type": "array",
-                "maxItems": 1,
+                "required": true,
                 "items": {
-                    "$ref": "#/definitions/buses_obj",
-                    "extendRefs": true
+                    "type": "object",
+                    "properties": {
+                        "bus_name": {
+                            "title": "Bus name",
+                            "description": "The name of your bus.",
+                            "type": "string",
+                            "default": "New bus",
+                            "minLength": 1,
+                            "required": true
+                        },
+                        "bus_IP": {
+                            "title": "Bus IP address",
+                            "description": "The IP address of your bus.",
+                            "type": "string",
+                            "format": "ipv4",
+                            "placeholder": "10.0.0.1",
+                            "required": true
+                        },
+                        "bus_port": {
+                            "title": "Bus port",
+                            "description": "The port of your bus.",
+                            "type": "integer",
+                            "default": 6000,
+                            "required": true
+                        },
+                        "subnets": {
+                            "title": "Subnets",
+                            "type": "array",
+                            "required": true,
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "subnet_number": {
+                                        "title": "Subnet number",
+                                        "type": "number",
+                                        "minimum": 0,
+                                        "maximum": 254
+                                    },
+                                    "cd_number": {
+                                        "title": "Control device number",
+                                        "type": "number",
+                                        "minimum": 0,
+                                        "maximum": 254
+                                    },
+                                    "devices": {
+                                        "title": "Devices",
+                                        "type": "array",
+                                        "required": true,
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "device_name": {
+                                                    "title": "Device Name",
+                                                    "type": "string"
+                                                },
+                                                "device_address": {
+                                                    "title": "Device Address",
+                                                    "type": "number",
+                                                    "minimum": 0,
+                                                    "maximum": 254
+                                                },
+                                                "device_type": {
+                                                    "title": "Device type",
+                                                    "type": "string",
+                                                    "oneOf": [{
+                                                            "title": "Relay Lightbulb",
+                                                            "enum": ["relaylightbulb"]
+                                                        }, {
+                                                            "title": "Relay Dimmable Lightbulb",
+                                                            "enum": ["relaydimmablelightbulb"]
+                                                        }, {
+                                                            "title": "Relay Lock",
+                                                            "enum": ["relaylock"]
+                                                        }, {
+                                                            "title": "Dry Contact",
+                                                            "enum": ["drycontact"]
+                                                        }, {
+                                                            "title": "Sensor",
+                                                            "enum": ["sensor8in1"]
+                                                        }
+                                                    ]
+                                                },
+                                                "area": {
+                                                    "title": "Area",
+                                                    "type": "number",
+                                                    "minimum": 0,
+                                                    "maximum": 254,
+                                                    "default": 1,
+                                                    "description": "Change it in case your relay supports areas"
+                                                },
+                                                "channel": {
+                                                    "title": "Device Channel",
+                                                    "type": "number",
+                                                    "minimum": 0,
+                                                    "maximum": 254
+                                                },
+                                                "nc": {
+                                                    "title": "Circuit type",
+                                                    "type": "boolean",
+                                                    "description": "Allows to flip logic for which state of contact is active",
+                                                    "default": true
+                                                },
+                                                "drycontact_type": {
+                                                    "title": "Dry contact purpose",
+                                                    "type": "string",
+                                                    "description": "Select dry contact purpose",
+                                                    "oneOf": [{
+                                                            "title": "Leak Sensor",
+                                                            "enum": ["leaksensor"]
+                                                        }, {
+                                                            "title": "Contact Sensor",
+                                                            "enum": ["contactsensor"]
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
-    }
+    },
+    "layout": [{
+            "key": "buses",
+            "type": "tabarray",
+            "title": "{{ value.bus_name || 'bus' }}",
+            "items": [
+                "buses[].bus_name",
+                "buses[].bus_IP",
+                "buses[].bus_port", {
+                    "key": "buses[]",
+                    "type": "array",
+                    "title": "{{ value.title }}",
+                    "items": [{
+                            "key": "buses[].subnets",
+                            "title": "Subnets",
+                            "buttonText": "Add Bus subnets",
+                            "type": "array",
+                            "expandable": true,
+                            "expanded": true,
+                            "items": [
+                                "buses[].subnets[].subnet_number",
+                                "buses[].subnets[].cd_number", {
+                                    "key": "buses[].subnets[].devices",
+                                    "buttonText": "Add device",
+                                    "type": "array",
+                                    "expandable": true,
+                                    "expanded": false,
+                                    "items": [
+                                        "buses[].subnets[].devices[].device_name",
+                                        "buses[].subnets[].devices[].device_address",
+                                        "buses[].subnets[].devices[].device_type", {
+                                            "key": "buses[].subnets[].devices[].area",
+                                            "condition": {
+                                                "functionBody": "return (['drycontact'].includes(model.buses[arrayIndices[0]].subnets[arrayIndices[1]].devices[arrayIndices[2]].device_type))"
+                                            }
+                                        }, {
+                                            "key": "buses[].subnets[].devices[].channel",
+                                            "condition": {
+                                                "functionBody": "return (['relaylightbulb', 'relaydimmablelightbulb', 'drycontact', 'relaylock'].includes(model.buses[arrayIndices[0]].subnets[arrayIndices[1]].devices[arrayIndices[2]].device_type))"
+                                            }
+                                        }, {
+                                            "key": "buses[].subnets[].devices[].drycontact_type",
+                                            "condition": {
+                                                "functionBody": "return (['drycontact'].includes(model.buses[arrayIndices[0]].subnets[arrayIndices[1]].devices[arrayIndices[2]].device_type))"
+                                            }
+                                        }, {
+                                            "key": "buses[].subnets[].devices[].nc",
+                                            "type": "radios-inline",
+                                            "titleMap": [{
+                                                    "name": "Normally closed",
+                                                    "value": true
+                                                }, {
+                                                    "name": "Normally open",
+                                                    "value": false
+                                                }
+                                            ],
+                                            "condition": {
+                                                "functionBody": "return (['relaylock', 'drycontact'].includes(model.buses[arrayIndices[0]].subnets[arrayIndices[1]].devices[arrayIndices[2]].device_type))"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
 }

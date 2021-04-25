@@ -9,9 +9,9 @@ export class RelayLightbulb {
     On: false,
   };
 
+  private bus: Bus;
   private cdnstr: string;
   private devicestr: string;
-  private bus: Bus;
 
   constructor(
     private readonly platform: HDLBusproHomebridge,
@@ -19,8 +19,8 @@ export class RelayLightbulb {
     private readonly lightname: string,
     private readonly ip: string,
     private readonly port: number,
-    private readonly control: number,
     private readonly subnet: number,
+    private readonly cdn: number,
     private readonly device: number,
     private readonly channel: number,
   ) {
@@ -31,7 +31,7 @@ export class RelayLightbulb {
     this.service.getCharacteristic(this.platform.Characteristic.On)
       .onSet(this.setOn.bind(this))
       .onGet(this.getOn.bind(this));
-    this.cdnstr = String(subnet).concat('.', String(control));
+    this.cdnstr = String(subnet).concat('.', String(cdn));
     this.devicestr = String(subnet).concat('.', String(device));
     this.bus = new Bus({
       device: this.cdnstr,
