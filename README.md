@@ -1,6 +1,6 @@
 <span align="center">
 
-# hdl-buspro-homebridge
+# homebridge-hdl-buspro
 ## HomeKit integration for HDL Buspro relays
 
 </span>
