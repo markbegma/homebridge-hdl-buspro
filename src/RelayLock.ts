@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable curly */
 import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
 
@@ -8,6 +9,7 @@ export class RelayLock {
   private service: Service;
   private RelayLockStates = {
     Lock: true,
+    Target: true,
   };
 
   private bus: Bus;
@@ -25,6 +27,7 @@ export class RelayLock {
     private readonly device: string,
     private readonly channel: number,
     private readonly nc: boolean,
+    private readonly lock_timeout: number,
   ) {
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, 'HDL');
@@ -32,10 +35,10 @@ export class RelayLock {
     this.accessory.getService(this.platform.Service.LockMechanism) || this.accessory.addService(this.platform.Service.LockMechanism);
     this.service.setCharacteristic(this.platform.Characteristic.Name, lockname);
     this.service.getCharacteristic(this.platform.Characteristic.LockCurrentState)
-      .onGet(this.getOn.bind(this));
+      .onGet(this.handleLockCurrentStateGet.bind(this));
     this.service.getCharacteristic(this.platform.Characteristic.LockTargetState)
-      .onSet(this.setOn.bind(this))
-      .onGet(this.getOn.bind(this));
+      .onSet(this.handleLockTargetStateSet.bind(this))
+      .onGet(this.handleLockTargetStateGet.bind(this));
     this.cdnstr = String(subnet).concat('.', String(cdn));
     this.devicestr = String(subnet).concat('.', String(device));
     this.bus = new Bus({
@@ -44,42 +47,62 @@ export class RelayLock {
       port: this.port,
     });
 
-
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const that = this;
     this.bus.device(this.devicestr).on(0x0032, (command) => {
       const data = command.data;
       const channel = data.channel;
       const level = data.level;
-      if (channel === that.channel) {
-        if (this.nc) that.RelayLockStates.Lock = (level > 0 ? false : true);
-        else that.RelayLockStates.Lock = (level > 0 ? true : false);
-        that.service.getCharacteristic(that.platform.Characteristic.LockCurrentState).updateValue(that.RelayLockStates.Lock);
-        if (that.RelayLockStates.Lock) {
-          if (this.nc) that.platform.log.debug(that.lockname + ' is now closed');
-          else that.platform.log.debug(that.lockname + ' is now open');
+      if (channel === this.channel) {
+        if (this.nc) this.RelayLockStates.Lock = (level > 0 ? false : true);
+        else this.RelayLockStates.Lock = (level > 0 ? true : false);
+        this.service.getCharacteristic(this.platform.Characteristic.LockCurrentState).updateValue(this.RelayLockStates.Lock);
+        if (this.RelayLockStates.Lock) {
+          if (this.nc) this.platform.log.debug(this.lockname + ' is now closed');
+          else this.platform.log.debug(this.lockname + ' is now open');
         } else {
-          if (this.nc) that.platform.log.debug(that.lockname + ' is now open');
-          else that.platform.log.debug(that.lockname + ' is now closed');
+          if (this.nc) this.platform.log.debug(this.lockname + ' is now open');
+          else this.platform.log.debug(this.lockname + ' is now closed');
         }
       }
     });
   }
 
-  async setOn(value: CharacteristicValue) {
-    let boolvalue = true;
+  async handleLockTargetStateSet(value: CharacteristicValue) {
+    let boolvalue: boolean;
     if (this.nc) boolvalue = (value===0);
     else boolvalue = (value===1);
-    this.RelayLockStates.Lock = boolvalue;
     this.bus.send({
       sender: this.cdnstr,
       target: this.devicestr,
       command: 0x0031,
-      data: { channel: this.channel, level: (+this.RelayLockStates.Lock * 100) },
+      data: { channel: this.channel, level: ((boolvalue as unknown as number) * 100) },
     }, false);
+    this.RelayLockStates.Lock = boolvalue;
+    this.RelayLockStates.Target = boolvalue;
+    this.service.getCharacteristic(this.platform.Characteristic.LockCurrentState).updateValue(this.RelayLockStates.Lock as unknown as number);
+    this.service.getCharacteristic(this.platform.Characteristic.LockTargetState).updateValue(this.RelayLockStates.Target as unknown as number);
+    if (((value as number) === 0) && (this.lock_timeout > 0)) {
+      setTimeout(() => {
+        this.bus.send({
+          sender: this.cdnstr,
+          target: this.devicestr,
+          command: 0x0031,
+          data: { channel: this.channel, level: ((!boolvalue as unknown as number) * 100) },
+        }, false);
+        setTimeout(() => {
+          this.RelayLockStates.Lock = !boolvalue;
+          this.RelayLockStates.Target = !boolvalue;
+          this.service.getCharacteristic(this.platform.Characteristic.LockCurrentState).updateValue(1);
+          this.service.getCharacteristic(this.platform.Characteristic.LockTargetState).updateValue(1);
+        }, 3000);
+      }, 1000 * this.lock_timeout);
+    }
   }
 
-  async getOn(): Promise<CharacteristicValue> {
+  async handleLockCurrentStateGet(): Promise<CharacteristicValue> {
     return this.RelayLockStates.Lock;
+  }
+
+  async handleLockTargetStateGet(): Promise<CharacteristicValue> {
+    return this.RelayLockStates.Target;
   }
 }

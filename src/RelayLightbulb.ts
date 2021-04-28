@@ -58,13 +58,13 @@ export class RelayLightbulb {
   }
 
   async setOn(value: CharacteristicValue) {
-    this.RelayLightbulbStates.On = value as boolean;
     this.bus.send({
       sender: this.cdnstr,
       target: this.devicestr,
       command: 0x0031,
-      data: { channel: this.channel, level: (+this.RelayLightbulbStates.On * 100) },
+      data: { channel: this.channel, level: ((value as number) * 100) },
     }, false);
+    this.RelayLightbulbStates.On = value as boolean;
   }
 
 

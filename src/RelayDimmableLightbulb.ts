@@ -64,13 +64,13 @@ export class RelayDimmableLightbulb {
   }
 
   async setOn(value: CharacteristicValue) {
-    this.RelayDimmableLightbulbStates.On = value as boolean;
     this.bus.send({
       sender: this.cdnstr,
       target: this.devicestr,
       command: 0x0031,
-      data: { channel: this.channel, level: (+this.RelayDimmableLightbulbStates.On * 100) },
+      data: { channel: this.channel, level: ((value as number) * 100) },
     }, false);
+    this.RelayDimmableLightbulbStates.On = value as boolean;
   }
 
   async getOn(): Promise<CharacteristicValue> {
@@ -78,13 +78,13 @@ export class RelayDimmableLightbulb {
   }
 
   async setBrightness(value: CharacteristicValue) {
-    this.RelayDimmableLightbulbStates.Brightness = value as number;
     this.bus.send({
       sender: this.cdnstr,
       target: this.devicestr,
       command: 0x0031,
-      data: { channel: this.channel, level: this.RelayDimmableLightbulbStates.Brightness },
+      data: { channel: this.channel, level: value as number },
     }, false);
+    this.RelayDimmableLightbulbStates.Brightness = (value as number);
   }
 
   async getBrightness(): Promise<CharacteristicValue> {

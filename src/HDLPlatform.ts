@@ -10,6 +10,8 @@ import { Sensor8in1 } from './Sensor8in1';
 import { RelayLock } from './RelayLock';
 import { LeakSensor } from './LeakSensor';
 import { ContactSensor } from './ContactSensor';
+import { RelayCurtains } from './RelayCurtains';
+import { RelayCurtainValve } from './RelayCurtainValve';
 
 export class HDLBusproHomebridge implements DynamicPlatformPlugin {
   public readonly Service: typeof Service = this.api.hap.Service;
@@ -95,17 +97,56 @@ export class HDLBusproHomebridge implements DynamicPlatformPlugin {
             case 'relaylock':
               var channel_number = device.channel;
               var nc = device.nc;
+              var lock_timeout = device.lock_timeout;
               var UniqueID =
               String(ip).concat(':', String(port), '.', String(subnet_number), '.', String(device_number), '.', String(channel_number));
               var uuid = this.api.hap.uuid.generate(UniqueID);
               var existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
               if (existingAccessory) {
                 this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
-                new RelayLock(this, existingAccessory, device_name, ip, port, subnet_number, cd_number, device_number, channel_number, nc);
+                new RelayLock(this, existingAccessory, device_name, ip, port, subnet_number, cd_number, device_number, channel_number, nc, lock_timeout);
               } else {
                 this.log.info('Adding new accessory:', device_name);
                 var accessory = new this.api.platformAccessory(device_name, uuid);
-                new RelayLock(this, accessory, device_name, ip, port, subnet_number, cd_number, device_number, channel_number, nc);
+                new RelayLock(this, accessory, device_name, ip, port, subnet_number, cd_number, device_number, channel_number, nc, lock_timeout);
+                this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+              }
+              break;
+            case 'relaycurtains':
+              var channel_number = device.channel;
+              var duration = device.duration;
+              var nc = device.nc;
+              var curtains_precision = device.curtains_precision;
+              var UniqueID =
+                String(ip).concat(':', String(port), '.', String(subnet_number), '.', String(device_number), '.', String(channel_number));
+              var uuid = this.api.hap.uuid.generate(UniqueID);
+              var existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
+              if (existingAccessory) {
+                this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
+                new RelayCurtains(this, existingAccessory, device_name, ip, port, subnet_number, cd_number, device_number, channel_number, nc, duration, curtains_precision);
+              } else {
+                this.log.info('Adding new accessory:', device_name);
+                var accessory = new this.api.platformAccessory(device_name, uuid);
+                new RelayCurtains(this, accessory, device_name, ip, port, subnet_number, cd_number, device_number, channel_number, nc, duration, curtains_precision);
+                this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+              }
+              break;
+            case 'relaycurtainvalve':
+              var channel_number = device.channel;
+              var duration = device.duration;
+              var nc = device.nc;
+              var valvetype = device.valvetype;
+              var UniqueID =
+                  String(ip).concat(':', String(port), '.', String(subnet_number), '.', String(device_number), '.', String(channel_number));
+              var uuid = this.api.hap.uuid.generate(UniqueID);
+              var existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
+              if (existingAccessory) {
+                this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
+                new RelayCurtainValve(this, existingAccessory, device_name, ip, port, subnet_number, cd_number, device_number, channel_number, nc, duration, valvetype);
+              } else {
+                this.log.info('Adding new accessory:', device_name);
+                var accessory = new this.api.platformAccessory(device_name, uuid);
+                new RelayCurtainValve(this, accessory, device_name, ip, port, subnet_number, cd_number, device_number, channel_number, nc, duration, valvetype);
                 this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
               }
               break;

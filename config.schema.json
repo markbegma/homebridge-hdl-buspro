@@ -89,6 +89,12 @@
                                                         }, {
                                                             "title": "Sensor",
                                                             "enum": ["sensor8in1"]
+                                                        }, {
+                                                            "title": "Relay Curtains",
+                                                            "enum": ["relaycurtains"]
+                                                        }, {
+                                                            "title": "Relay Curtain Valve",
+                                                            "enum": ["relaycurtainvalve"]
                                                         }
                                                     ]
                                                 },
@@ -106,11 +112,29 @@
                                                     "minimum": 0,
                                                     "maximum": 254
                                                 },
+                                                "lock_timeout": {
+                                                    "title": "Lock timeout",
+                                                    "type": "number",
+                                                    "minimum": 0
+                                                },
                                                 "nc": {
                                                     "title": "Circuit type",
                                                     "type": "boolean",
                                                     "description": "Allows to flip logic for which state of contact is active",
                                                     "default": true
+                                                },
+                                                "duration": {
+                                                    "title": "Duration",
+                                                    "type": "number",
+                                                    "description": "How long does it take for curtain to fully open. Should coincide with value from HDL.",
+                                                    "minimum": 0
+                                                },
+                                                "curtains_precision": {
+                                                    "title": "Curtains position precision (%)",
+                                                    "type": "number",
+                                                    "description": "Due to the fact HDL can only measure percentage of curtains open by timer and the favct that HDL relay and your HB server have a lag, precise condition in current/target levels may leave curtain status bugged as 'opening'. Increase this value it this happens.",
+                                                    "minimum": 0,
+                                                    "default": 5
                                                 },
                                                 "drycontact_type": {
                                                     "title": "Dry contact purpose",
@@ -122,6 +146,25 @@
                                                         }, {
                                                             "title": "Contact Sensor",
                                                             "enum": ["contactsensor"]
+                                                        }
+                                                    ]
+                                                },
+                                                "valve_type": {
+                                                    "title": "Valve type",
+                                                    "type": "string",
+                                                    "description": "Select 1 of four valve types",
+                                                    "oneOf": [{
+                                                            "title": "General Valve",
+                                                            "enum": [0]
+                                                        }, {
+                                                            "title": "Irrigation",
+                                                            "enum": [1]
+                                                        }, {
+                                                            "title": "Shower Head",
+                                                            "enum": [2]
+                                                        }, {
+                                                            "title": "Water Faucet",
+                                                            "enum": [3]
                                                         }
                                                     ]
                                                 }
@@ -181,6 +224,16 @@
                                                 "functionBody": "return (['drycontact'].includes(model.buses[arrayIndices[0]].subnets[arrayIndices[1]].devices[arrayIndices[2]].device_type))"
                                             }
                                         }, {
+                                            "key": "buses[].subnets[].devices[].lock_timeout",
+                                            "condition": {
+                                                "functionBody": "return (['relaylock'].includes(model.buses[arrayIndices[0]].subnets[arrayIndices[1]].devices[arrayIndices[2]].device_type))"
+                                            }
+                                        }, {
+                                            "key": "buses[].subnets[].devices[].duration",
+                                            "condition": {
+                                                "functionBody": "return (['relaycurtains'].includes(model.buses[arrayIndices[0]].subnets[arrayIndices[1]].devices[arrayIndices[2]].device_type))"
+                                            }
+                                        }, {
                                             "key": "buses[].subnets[].devices[].nc",
                                             "type": "radios-inline",
                                             "titleMap": [{
@@ -193,6 +246,16 @@
                                             ],
                                             "condition": {
                                                 "functionBody": "return (['relaylock', 'drycontact'].includes(model.buses[arrayIndices[0]].subnets[arrayIndices[1]].devices[arrayIndices[2]].device_type))"
+                                            }
+                                        }, {
+                                            "key": "buses[].subnets[].devices[].valvetype",
+                                            "condition": {
+                                                "functionBody": "return (['relaycurtainvalve'].includes(model.buses[arrayIndices[0]].subnets[arrayIndices[1]].devices[arrayIndices[2]].device_type))"
+                                            }
+                                        }, {
+                                            "key": "buses[].subnets[].devices[].curtains_precision",
+                                            "condition": {
+                                                "functionBody": "return (['relaycurtains'].includes(model.buses[arrayIndices[0]].subnets[arrayIndices[1]].devices[arrayIndices[2]].device_type))"
                                             }
                                         }
                                     ]

@@ -1,6 +1,6 @@
 <span align="center">
 
-# hdl-buspro-homebridge
+# homebridge-hdl-buspro
 ## HomeKit integration for HDL Buspro relays
 
 </span>
@@ -111,7 +111,7 @@ Separate number for each subnet
 Any unoccupied number on subnet to control your devices from
 - `devices` [optional]
 Add all devices on subnet you need
-#### Subnet configuration fields
+#### Device configuration fields
 - `device_name` [optional]
 Your custom name for device, will be shown in Home app by default
 - `device_address` [required]
@@ -124,8 +124,10 @@ Specify the type of device
     - *"sensor8in1"* - multisensor
     - *"relaylock"* - custom use of light relay to control a lock
     - *"drycontact"* - dry contact relay
+    - *"relaycurtains"* - relay curtains (have to be calibrated in HDL)
+    - *"relaycurtainvalve"* - custom usage of curtains relay to control a water valve
 - `channel` [optional]
-Specify channel for a specific light group or dry contact of relay
+Specify channel for a specific light group, curtains or dry contact of relay
 - `area` [optional]
 Needed for some dry contact relays
 - `nc` [required]
@@ -135,11 +137,19 @@ Specify what your dry contact sensor does
   - Available values:
     - *"leaksensor"* - leak sensor
     - *"contactsensor"* - contact sensor
+- `lock_timeout` [required]
+An option to close lock automatically after specified time. Default is 0, which is usual lock behavior
+- `duration` [required]
+HDL can only control partial curtain opening by timer, so you have to calibrate how long it takes to fully open curtain, put this value to HDL and copy it here to avoid misalignment
+- `curtains_precision` [required]
+Due to a lag between HDL and HB curtain timers there has to be some precision offset, or it might get bugged in "opening" status. Increase this value if you encounter it.
+- `valvetype` [required]
+You can choose 4 valve types: "General Valve", "Irrigation", "Shower Head", "Water Faucet".
 
 
 
 ## Troubleshooting
-If you have any issues with the plugin or TV services then you can run homebridge in debug mode, which will provide some additional information. This might be useful for debugging issues.
+If you have any issues with the plugin then you can run homebridge in debug mode, which will provide some additional information. This might be useful for debugging issues.
 
 Please keep in mind that I could only test how plugin works on devices I have at home, and some devices were coded only based on documentation. So feel free to open issues [here](https://github.com//markbegma/homebridge-hdl-buspro/issues) if you encounter problems/need your device supported!
 
