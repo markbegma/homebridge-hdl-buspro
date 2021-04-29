@@ -5,16 +5,21 @@ import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
 import { HDLBusproHomebridge } from './HDLPlatform';
 import Bus from 'smart-bus';
 
+const HMBOpen = 0;
+const HMBClosed = 1;
+
 export class RelayLock {
   private service: Service;
   private RelayLockStates = {
-    Lock: true,
-    Target: true,
+    Lock: HMBClosed,
+    Target: HMBClosed,
   };
 
   private bus: Bus;
   private cdnstr: string;
   private devicestr: string;
+  private HDLOpen = 1;
+  private HDLClosed = 0;
 
   constructor(
     private readonly platform: HDLBusproHomebridge,
@@ -47,53 +52,49 @@ export class RelayLock {
       port: this.port,
     });
 
+    if (this.nc===false) {
+      this.HDLOpen = 0;
+      this.HDLClosed = 1;
+    }
+
     this.bus.device(this.devicestr).on(0x0032, (command) => {
       const data = command.data;
       const channel = data.channel;
       const level = data.level;
       if (channel === this.channel) {
-        if (this.nc) this.RelayLockStates.Lock = (level > 0 ? false : true);
-        else this.RelayLockStates.Lock = (level > 0 ? true : false);
+        if (this.nc) this.RelayLockStates.Lock = (level === 0 ? HMBClosed : HMBOpen);
+        else this.RelayLockStates.Lock = (level === 0 ? HMBOpen : HMBClosed);
         this.service.getCharacteristic(this.platform.Characteristic.LockCurrentState).updateValue(this.RelayLockStates.Lock);
-        if (this.RelayLockStates.Lock) {
-          if (this.nc) this.platform.log.debug(this.lockname + ' is now closed');
-          else this.platform.log.debug(this.lockname + ' is now open');
-        } else {
-          if (this.nc) this.platform.log.debug(this.lockname + ' is now open');
-          else this.platform.log.debug(this.lockname + ' is now closed');
-        }
+        if (this.RelayLockStates.Lock === HMBClosed) this.platform.log.debug(this.lockname + ' is now closed');
+        else this.platform.log.debug(this.lockname + ' is now open');
       }
     });
   }
 
   async handleLockTargetStateSet(value: CharacteristicValue) {
-    let boolvalue: boolean;
-    if (this.nc) boolvalue = (value===0);
-    else boolvalue = (value===1);
+    value = value as number;
+    if (this.nc) {
+      if (value === 0) value = 1;
+      else value = 0;
+    }
     this.bus.send({
       sender: this.cdnstr,
       target: this.devicestr,
       command: 0x0031,
-      data: { channel: this.channel, level: ((boolvalue as unknown as number) * 100) },
+      data: { channel: this.channel, level:  value * 100 },
     }, false);
-    this.RelayLockStates.Lock = boolvalue;
-    this.RelayLockStates.Target = boolvalue;
-    this.service.getCharacteristic(this.platform.Characteristic.LockCurrentState).updateValue(this.RelayLockStates.Lock as unknown as number);
-    this.service.getCharacteristic(this.platform.Characteristic.LockTargetState).updateValue(this.RelayLockStates.Target as unknown as number);
-    if (((value as number) === 0) && (this.lock_timeout > 0)) {
+    this.RelayLockStates.Target = value;
+    this.service.getCharacteristic(this.platform.Characteristic.LockTargetState).updateValue(this.RelayLockStates.Target);
+    if ((value === 1) && (this.lock_timeout > 0)) {
       setTimeout(() => {
+        this.RelayLockStates.Target = 1;
+        this.service.getCharacteristic(this.platform.Characteristic.LockTargetState).updateValue(1);
         this.bus.send({
           sender: this.cdnstr,
           target: this.devicestr,
           command: 0x0031,
-          data: { channel: this.channel, level: ((!boolvalue as unknown as number) * 100) },
+          data: { channel: this.channel, level:  0 },
         }, false);
-        setTimeout(() => {
-          this.RelayLockStates.Lock = !boolvalue;
-          this.RelayLockStates.Target = !boolvalue;
-          this.service.getCharacteristic(this.platform.Characteristic.LockCurrentState).updateValue(1);
-          this.service.getCharacteristic(this.platform.Characteristic.LockTargetState).updateValue(1);
-        }, 3000);
       }, 1000 * this.lock_timeout);
     }
   }

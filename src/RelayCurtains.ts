@@ -76,7 +76,7 @@ export class RelayCurtains {
         case this.HDLStop:
           this.RelayCurtainsStates.PositionState = HMBStop;
           this.service.getCharacteristic(this.platform.Characteristic.PositionState).updateValue(this.RelayCurtainsStates.PositionState);
-          this.platform.log.debug(this.name + ' reached stop at ' + this.RelayCurtainsStates.CurrentPosition + this.RelayCurtainsStates.TargetPosition + this.precision);
+          this.platform.log.debug(this.name + ' reached stop at ' + this.RelayCurtainsStates.CurrentPosition);
           break;
         case this.HDLOpening:
           this.RelayCurtainsStates.PositionState = HMBOpening;

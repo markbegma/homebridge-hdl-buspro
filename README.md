@@ -13,8 +13,9 @@
 * Sensors 8 in 1 (dry contacts not supported yet)
 * Dry contact relays (leak and contact sensors)
 * Relay locks
+* Relay curtains (including custon valve usage)
 
-Curtains, heaters and security systems will be supported in later versions, as well as more types of dry contact sensors.
+Heaters and security systems will be supported in later versions, as well as more types of dry contact sensors.
 
 ## Installation
 
