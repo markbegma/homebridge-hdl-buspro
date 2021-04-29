@@ -1,7 +1,10 @@
 # Changelog
 
+## 2.1.1 (2021-04-29)
+
+* [+] Fixes to bad behavior of relay locks and curtains
+
 ## 2.0.1 (2021-04-28)
-This update includes the following changes:
 
 * [+] Added support for Relay Curtains and custom Relay Curtain Valve
 * [+] Added an option to auto close relay lock after some time
