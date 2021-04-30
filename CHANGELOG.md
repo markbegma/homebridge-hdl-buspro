@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.2 (2021-04-30)
+
+* [+] Fixed a relay valve status bug
+
 ## 2.1.1 (2021-04-29)
 
 * [+] Fixes to bad behavior of relay locks and curtains

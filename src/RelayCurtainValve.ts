@@ -88,10 +88,9 @@ export class RelayCurtainValve {
             this.RelayCurtainValveStates.Active = 0;
             this.RelayCurtainValveStates.InUse = 0;
             this.platform.log.debug(this.name + ' is now inactive');
-          } else {
-            this.service.getCharacteristic(this.platform.Characteristic.Active).updateValue(this.RelayCurtainValveStates.Active);
-            this.service.getCharacteristic(this.platform.Characteristic.InUse).updateValue(this.RelayCurtainValveStates.InUse);
           }
+          this.service.getCharacteristic(this.platform.Characteristic.Active).updateValue(this.RelayCurtainValveStates.Active);
+          this.service.getCharacteristic(this.platform.Characteristic.InUse).updateValue(this.RelayCurtainValveStates.InUse);
           this.wasactive = this.HDLStop;
           break;
         case this.HDLOpening:
