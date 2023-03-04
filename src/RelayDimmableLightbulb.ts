@@ -17,7 +17,7 @@ export class RelayDimmableLightbulb {
   constructor(
     private readonly platform: HDLBusproHomebridge,
     private readonly accessory: PlatformAccessory,
-    private readonly lightname: string,
+    private readonly name: string,
     private readonly ip: string,
     private readonly port: number,
     private readonly subnet: number,
@@ -28,7 +28,7 @@ export class RelayDimmableLightbulb {
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, 'HDL');
     this.service = this.accessory.getService(this.platform.Service.Lightbulb) || this.accessory.addService(this.platform.Service.Lightbulb);
-    this.service.setCharacteristic(this.platform.Characteristic.Name, lightname);
+    this.service.setCharacteristic(this.platform.Characteristic.Name, name);
     this.service.getCharacteristic(this.platform.Characteristic.On)
       .onSet(this.setOn.bind(this))
       .onGet(this.getOn.bind(this));
@@ -55,9 +55,9 @@ export class RelayDimmableLightbulb {
         that.RelayDimmableLightbulbStates.Brightness = level;
         that.service.getCharacteristic(that.platform.Characteristic.Brightness).updateValue(that.RelayDimmableLightbulbStates.Brightness);
         if (that.RelayDimmableLightbulbStates.On) {
-          that.platform.log.debug(that.lightname + ' is now on with brightness ' + that.RelayDimmableLightbulbStates.Brightness);
+          that.platform.log.debug(that.name + ' is now on with brightness ' + that.RelayDimmableLightbulbStates.Brightness);
         } else {
-          that.platform.log.debug(that.lightname + ' is now off with brightness ' + that.RelayDimmableLightbulbStates.Brightness);
+          that.platform.log.debug(that.name + ' is now off with brightness ' + that.RelayDimmableLightbulbStates.Brightness);
         }
       }
     });

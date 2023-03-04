@@ -1,7 +1,8 @@
 import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
 
 import { HDLBusproHomebridge } from './HDLPlatform';
-import Bus from 'smart-bus';
+
+import Device from 'smart-bus';
 
 export class RelayLightbulb {
   private service: Service;
@@ -9,58 +10,49 @@ export class RelayLightbulb {
     On: false,
   };
 
-  private bus: Bus;
-  private cdnstr: string;
-  private devicestr: string;
-
   constructor(
     private readonly platform: HDLBusproHomebridge,
     private readonly accessory: PlatformAccessory,
-    private readonly lightname: string,
-    private readonly ip: string,
-    private readonly port: number,
-    private readonly subnet: number,
-    private readonly cdn: number,
-    private readonly device: number,
+    private readonly name: string,
+    private readonly controller: Device,
+    private readonly device: Device,
     private readonly channel: number,
   ) {
-    this.accessory.getService(this.platform.Service.AccessoryInformation)!
-      .setCharacteristic(this.platform.Characteristic.Manufacturer, 'HDL');
-    this.service = this.accessory.getService(this.platform.Service.Lightbulb) || this.accessory.addService(this.platform.Service.Lightbulb);
-    this.service.setCharacteristic(this.platform.Characteristic.Name, lightname);
-    this.service.getCharacteristic(this.platform.Characteristic.On)
+    const Service = this.platform.Service;
+    const Characteristic = this.platform.Characteristic;
+    this.accessory.getService(Service.AccessoryInformation)!
+      .setCharacteristic(Characteristic.Manufacturer, 'HDL');
+    this.service = this.accessory.getService(Service.Lightbulb) || this.accessory.addService(Service.Lightbulb);
+    this.service.setCharacteristic(Characteristic.Name, name);
+    this.service.getCharacteristic(Characteristic.On)
       .onSet(this.setOn.bind(this))
       .onGet(this.getOn.bind(this));
-    this.cdnstr = String(subnet).concat('.', String(cdn));
-    this.devicestr = String(subnet).concat('.', String(device));
-    this.bus = new Bus({
-      device: this.cdnstr,
-      gateway: this.ip,
-      port: this.port,
-    });
 
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const that = this;
-    this.bus.device(this.devicestr).on(0x0032, (command) => {
+    this.device.on(0x0032, (command) => {
       const data = command.data;
       const channel = data.channel;
       const level = data.level;
-      if (channel === that.channel) {
-        that.RelayLightbulbStates.On = (level > 0);
-        that.service.getCharacteristic(that.platform.Characteristic.On).updateValue(that.RelayLightbulbStates.On);
-        if (that.RelayLightbulbStates.On) {
-          that.platform.log.debug(that.lightname + ' is now on');
+      if (channel === this.channel) {
+        this.RelayLightbulbStates.On = (level > 0);
+        this.service.getCharacteristic(Characteristic.On).updateValue(this.RelayLightbulbStates.On);
+        if (this.RelayLightbulbStates.On) {
+          this.platform.log.debug(this.name + ' is now on');
         } else {
-          that.platform.log.debug(that.lightname + ' is now off');
+          this.platform.log.debug(this.name + ' is now off');
         }
       }
     });
+    
+    this.controller.send({
+      target: this.device,
+      command: 0x0033,
+      data: {},
+    }, false);
   }
 
   async setOn(value: CharacteristicValue) {
-    this.bus.send({
-      sender: this.cdnstr,
-      target: this.devicestr,
+    this.controller.send({
+      target: this.device,
       command: 0x0031,
       data: { channel: this.channel, level: ((value as number) * 100) },
     }, false);
