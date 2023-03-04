@@ -1,7 +1,8 @@
 import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
 
 import { HDLBusproHomebridge } from './HDLPlatform';
-import Bus from 'smart-bus';
+import Device from 'smart-bus';
+import { RelayListener } from './RelayLightbulb';
 
 export class RelayDimmableLightbulb {
   private service: Service;
@@ -10,67 +11,61 @@ export class RelayDimmableLightbulb {
     Brightness: 0,
   };
 
-  private bus: Bus;
-  private cdnstr: string;
-  private devicestr: string;
-
   constructor(
     private readonly platform: HDLBusproHomebridge,
     private readonly accessory: PlatformAccessory,
     private readonly name: string,
-    private readonly ip: string,
-    private readonly port: number,
-    private readonly subnet: number,
-    private readonly cdn: string,
-    private readonly device: string,
+    private readonly controller: Device,
+    private readonly device: Device,
+    private readonly listener: RelayListener,
     private readonly channel: number,
   ) {
-    this.accessory.getService(this.platform.Service.AccessoryInformation)!
-      .setCharacteristic(this.platform.Characteristic.Manufacturer, 'HDL');
-    this.service = this.accessory.getService(this.platform.Service.Lightbulb) || this.accessory.addService(this.platform.Service.Lightbulb);
-    this.service.setCharacteristic(this.platform.Characteristic.Name, name);
-    this.service.getCharacteristic(this.platform.Characteristic.On)
+    const Service = this.platform.Service;
+    const Characteristic = this.platform.Characteristic;
+    this.accessory.getService(Service.AccessoryInformation)!
+      .setCharacteristic(Characteristic.Manufacturer, 'HDL');
+    this.service = this.accessory.getService(Service.Lightbulb) || this.accessory.addService(Service.Lightbulb);
+    this.service.setCharacteristic(Characteristic.Name, name);
+    this.service.getCharacteristic(Characteristic.On)
       .onSet(this.setOn.bind(this))
       .onGet(this.getOn.bind(this));
-    this.service.getCharacteristic(this.platform.Characteristic.Brightness)
+    this.service.getCharacteristic(Characteristic.Brightness)
       .onSet(this.setBrightness.bind(this))
       .onGet(this.getBrightness.bind(this));
-    this.cdnstr = String(subnet).concat('.', String(cdn));
-    this.devicestr = String(subnet).concat('.', String(device));
-    this.bus = new Bus({
-      device: this.cdnstr,
-      gateway: this.ip,
-      port: this.port,
-    });
 
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const that = this;
-    this.bus.device(this.devicestr).on(0x0032, (command) => {
-      const data = command.data;
-      const level = data.level;
-      const channel = data.channel;
-      if (channel === that.channel) {
-        that.RelayDimmableLightbulbStates.On = (level > 0);
-        that.service.getCharacteristic(that.platform.Characteristic.On).updateValue(that.RelayDimmableLightbulbStates.On);
-        that.RelayDimmableLightbulbStates.Brightness = level;
-        that.service.getCharacteristic(that.platform.Characteristic.Brightness).updateValue(that.RelayDimmableLightbulbStates.Brightness);
-        if (that.RelayDimmableLightbulbStates.On) {
-          that.platform.log.debug(that.name + ' is now on with brightness ' + that.RelayDimmableLightbulbStates.Brightness);
-        } else {
-          that.platform.log.debug(that.name + ' is now off with brightness ' + that.RelayDimmableLightbulbStates.Brightness);
-        }
+    const eventEmitter = this.listener.getChannelEventEmitter(this.channel);
+    eventEmitter.on('update', (level) => {
+      this.RelayDimmableLightbulbStates.On = (level > 0);
+      this.service.getCharacteristic(this.platform.Characteristic.On).updateValue(this.RelayDimmableLightbulbStates.On);
+      this.RelayDimmableLightbulbStates.Brightness = level;
+      this.service.getCharacteristic(Characteristic.Brightness).updateValue(this.RelayDimmableLightbulbStates.Brightness);
+      if (this.RelayDimmableLightbulbStates.On) {
+        this.platform.log.debug(this.name + ' is now on with brightness ' + this.RelayDimmableLightbulbStates.Brightness);
+      } else {
+        this.platform.log.debug(this.name + ' is now off with brightness ' + this.RelayDimmableLightbulbStates.Brightness);
       }
     });
   }
 
   async setOn(value: CharacteristicValue) {
-    this.bus.send({
-      sender: this.cdnstr,
-      target: this.devicestr,
-      command: 0x0031,
-      data: { channel: this.channel, level: ((value as number) * 100) },
-    }, false);
+    const oldValue = this.RelayDimmableLightbulbStates.On;
+    const oldBrightness = this.RelayDimmableLightbulbStates.Brightness;
     this.RelayDimmableLightbulbStates.On = value as boolean;
+    if (value && oldBrightness === 0) {
+      this.RelayDimmableLightbulbStates.Brightness = 100;
+    }
+    this.controller.send({
+      target: this.device,
+      command: 0x0031,
+      data: { channel: this.channel, level: (this.RelayDimmableLightbulbStates.Brightness as number) },
+    }, (err) => {
+      if (err) {
+        // Revert to the old values
+        this.RelayDimmableLightbulbStates.On = oldValue;
+        this.RelayDimmableLightbulbStates.Brightness = oldBrightness;
+        this.platform.log.error(`Error setting On state for ${this.device.name}: ${err.message}`);
+      }
+    });
   }
 
   async getOn(): Promise<CharacteristicValue> {
@@ -78,13 +73,26 @@ export class RelayDimmableLightbulb {
   }
 
   async setBrightness(value: CharacteristicValue) {
-    this.bus.send({
-      sender: this.cdnstr,
-      target: this.devicestr,
+    const oldBrightness = this.RelayDimmableLightbulbStates.Brightness;
+    const oldValue = this.RelayDimmableLightbulbStates.On;
+    if (value === 0) {
+      this.RelayDimmableLightbulbStates.On = false;
+    } else {
+      this.RelayDimmableLightbulbStates.On = true;
+    }
+    this.controller.send({
+      target: this.device,
       command: 0x0031,
-      data: { channel: this.channel, level: value as number },
-    }, false);
-    this.RelayDimmableLightbulbStates.Brightness = (value as number);
+      data: { channel: this.channel, level: ((value as number) * 100) },
+    }, (err) => {
+      if (err) {
+        // Revert to the old value
+        this.RelayDimmableLightbulbStates.On = oldValue;
+        this.RelayDimmableLightbulbStates.Brightness = oldBrightness;
+        this.platform.log.error(`Error setting Brightness state for ${this.device.name}: ${err.message}`);
+      }
+    });
+    this.RelayDimmableLightbulbStates.Brightness = value as number;
   }
 
   async getBrightness(): Promise<CharacteristicValue> {
