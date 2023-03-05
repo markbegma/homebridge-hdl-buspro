@@ -1,9 +1,7 @@
-/* eslint-disable max-len */
-/* eslint-disable curly */
 import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
+import Device from 'smart-bus';
 
 import { HDLBusproHomebridge } from './HDLPlatform';
-import Device from 'smart-bus';
 import { RelayListener } from './RelayLightbulb';
 
 

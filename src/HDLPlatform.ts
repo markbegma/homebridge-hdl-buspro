@@ -1,6 +1,3 @@
-/* eslint-disable max-len */
-/* eslint-disable no-var */
-/* eslint-disable no-case-declarations */
 import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from 'homebridge';
 import Bus from 'smart-bus';
 

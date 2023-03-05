@@ -146,6 +146,12 @@
                                                         }, {
                                                             "title": "Contact Sensor",
                                                             "enum": ["contactsensor"]
+                                                        }, {
+                                                            "title": "Smoke Sensor",
+                                                            "enum": ["smokesensor"]
+                                                        }, {
+                                                            "title": "Occupancy Sensor",
+                                                            "enum": ["occupancysensor"]
                                                         }
                                                     ]
                                                 },

@@ -1,10 +1,8 @@
 import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
-
-import { HDLBusproHomebridge } from './HDLPlatform';
-
+import { EventEmitter } from 'events';
 import Device from 'smart-bus';
 
-import { EventEmitter } from 'events';
+import { HDLBusproHomebridge } from './HDLPlatform';
 
 export class RelayLightbulb {
   private service: Service;
@@ -85,8 +83,8 @@ export class RelayListener {
     this.device.on(0x0034, (command) => {
       const data = command.data;
       for (const channelInfo of data) {
-        this.channelsMap.set(channelInfo.number, channelInfo.level);
-        this.eventEmitter.emit(`update_${channelInfo.number}`, channelInfo.level);
+        this.channelsMap.set(channelInfo.channel, channelInfo.level);
+        this.eventEmitter.emit(`update_${channelInfo.channel}`, channelInfo.level);
       }
     });
     // status request

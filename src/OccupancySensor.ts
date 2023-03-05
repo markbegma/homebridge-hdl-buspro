@@ -4,10 +4,10 @@ import Device from 'smart-bus';
 import { HDLBusproHomebridge } from './HDLPlatform';
 import { DryListener } from './ContactSensor';
 
-export class LeakSensor {
+export class OccupancySensor {
   private service: Service;
-  private LeakStates = {
-    Detected: this.platform.Characteristic.LeakDetected.LEAK_NOT_DETECTED,
+  private OccupancyStates = {
+    Detected: this.platform.Characteristic.OccupancyDetected.OCCUPANCY_NOT_DETECTED,
   };
 
   constructor(
@@ -26,23 +26,23 @@ export class LeakSensor {
     this.accessory.getService(Service.AccessoryInformation)!
       .setCharacteristic(Characteristic.Manufacturer, 'HDL');
     this.service =
-    this.accessory.getService(Service.LeakSensor) || this.accessory.addService(Service.LeakSensor);
+    this.accessory.getService(Service.OccupancySensor) || this.accessory.addService(Service.OccupancySensor);
     this.service.setCharacteristic(Characteristic.Name, name);
-    this.service.getCharacteristic(Characteristic.LeakDetected)
+    this.service.getCharacteristic(Characteristic.OccupancyDetected)
       .onGet(this.getOn.bind(this));
       if (area !== -1) {
         const eventEmitter = this.listener.getChannelEventEmitter(this.area, this.channel);
         eventEmitter.on('update', (contact) => {
           if (this.nc) {
-            if (contact) this.LeakStates.Detected = Characteristic.LeakDetected.LEAK_DETECTED;
-            else this.LeakStates.Detected = Characteristic.LeakDetected.LEAK_NOT_DETECTED;
+            if (contact) this.OccupancyStates.Detected = Characteristic.OccupancyDetected.OCCUPANCY_DETECTED;
+            else this.OccupancyStates.Detected = Characteristic.OccupancyDetected.OCCUPANCY_NOT_DETECTED;
           } else {
-            if (contact) this.LeakStates.Detected = Characteristic.LeakDetected.LEAK_NOT_DETECTED;
-            else this.LeakStates.Detected = Characteristic.LeakDetected.LEAK_DETECTED;
+            if (contact) this.OccupancyStates.Detected = Characteristic.OccupancyDetected.OCCUPANCY_NOT_DETECTED;
+            else this.OccupancyStates.Detected = Characteristic.OccupancyDetected.OCCUPANCY_DETECTED;
           }
-          this.service.getCharacteristic(Characteristic.ContactSensorState).updateValue(this.LeakStates.Detected);
-          if (this.LeakStates.Detected ===
-            Characteristic.LeakDetected.LEAK_DETECTED) this.platform.log.debug(this.name + ' has detected leak');
+          this.service.getCharacteristic(Characteristic.OccupancyDetected).updateValue(this.OccupancyStates.Detected);
+          if (this.OccupancyStates.Detected ===
+            Characteristic.OccupancyDetected.OCCUPANCY_DETECTED) this.platform.log.debug(this.name + ' has detected occupancy');
         });
   
         setInterval(() => {
@@ -56,6 +56,6 @@ export class LeakSensor {
     }
 
   async getOn(): Promise<CharacteristicValue> {
-    return this.LeakStates.Detected;
+    return this.OccupancyStates.Detected;
   }
 }
