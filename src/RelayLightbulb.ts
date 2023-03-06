@@ -69,7 +69,7 @@ export class RelayListener {
 
   constructor(
     private readonly device: Device,
-    private readonly controller: Device
+    private readonly controller: Device,
   ) {
     // control response listener
     this.device.on(0x0032, (command) => {
@@ -90,7 +90,7 @@ export class RelayListener {
     // status request
     this.controller.send({
       target: this.device,
-      command: 0x0033
+      command: 0x0033,
     }, false);
   }
 

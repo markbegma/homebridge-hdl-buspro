@@ -30,30 +30,38 @@ export class LeakSensor {
     this.service.setCharacteristic(Characteristic.Name, name);
     this.service.getCharacteristic(Characteristic.LeakDetected)
       .onGet(this.getOn.bind(this));
-      if (area !== -1) {
-        const eventEmitter = this.listener.getChannelEventEmitter(this.area, this.channel);
-        eventEmitter.on('update', (contact) => {
-          if (this.nc) {
-            if (contact) this.LeakStates.Detected = Characteristic.LeakDetected.LEAK_DETECTED;
-            else this.LeakStates.Detected = Characteristic.LeakDetected.LEAK_NOT_DETECTED;
+    if (area !== -1) {
+      const eventEmitter = this.listener.getChannelEventEmitter(this.area, this.channel);
+      eventEmitter.on('update', (contact) => {
+        if (this.nc) {
+          if (contact) {
+            this.LeakStates.Detected = Characteristic.LeakDetected.LEAK_DETECTED;
           } else {
-            if (contact) this.LeakStates.Detected = Characteristic.LeakDetected.LEAK_NOT_DETECTED;
-            else this.LeakStates.Detected = Characteristic.LeakDetected.LEAK_DETECTED;
+            this.LeakStates.Detected = Characteristic.LeakDetected.LEAK_NOT_DETECTED;
           }
-          this.service.getCharacteristic(Characteristic.ContactSensorState).updateValue(this.LeakStates.Detected);
-          if (this.LeakStates.Detected ===
-            Characteristic.LeakDetected.LEAK_DETECTED) this.platform.log.debug(this.name + ' has detected leak');
-        });
-  
-        setInterval(() => {
-          this.controller.send({
-            target: this.device,
-            command: 0x15CE,
-            data: { area: this.area, switch: this.channel },
-          }, false);
-        }, 1000);
-      }
+        } else {
+          if (contact) {
+            this.LeakStates.Detected = Characteristic.LeakDetected.LEAK_NOT_DETECTED;
+          } else {
+            this.LeakStates.Detected = Characteristic.LeakDetected.LEAK_DETECTED;
+          }
+        }
+        this.service.getCharacteristic(Characteristic.ContactSensorState).updateValue(this.LeakStates.Detected);
+        if (this.LeakStates.Detected ===
+            Characteristic.LeakDetected.LEAK_DETECTED) {
+          this.platform.log.debug(this.name + ' has detected leak');
+        }
+      });
+
+      setInterval(() => {
+        this.controller.send({
+          target: this.device,
+          command: 0x15CE,
+          data: { area: this.area, switch: this.channel },
+        }, false);
+      }, 1000);
     }
+  }
 
   async getOn(): Promise<CharacteristicValue> {
     return this.LeakStates.Detected;

@@ -130,7 +130,7 @@ export class RelayCurtains {
     this.controller.send({
       target: this.device,
       command: 0xE3E2,
-      data: { curtain: this.channel }
+      data: { curtain: this.channel },
     }, false);
   }
 
@@ -190,7 +190,7 @@ export class RelayCurtainListener {
 
   constructor(
     private readonly device: Device,
-    private readonly controller: Device
+    private readonly controller: Device,
   ) {
     // control response listener
     this.device.on(0xE3E1, (command) => {

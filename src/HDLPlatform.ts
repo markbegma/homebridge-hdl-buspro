@@ -2,7 +2,7 @@ import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, 
 import Bus from 'smart-bus';
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
-import { deviceTypeMap } from './DeviceList'
+import { deviceTypeMap } from './DeviceList';
 
 export class HDLBusproHomebridge implements DynamicPlatformPlugin {
   public readonly Service: typeof Service = this.api.hap.Service;
@@ -57,8 +57,10 @@ export class HDLBusproHomebridge implements DynamicPlatformPlugin {
       return;
     }
     const { deviceClass, listenerClass, uniqueArgs, idEnding } = deviceTypeConfig;
-    var uniqueIDSuffix = `.${device.device_address}`
-    if (idEnding(device)) uniqueIDSuffix = `${uniqueIDSuffix}.${idEnding(device)}`;
+    let uniqueIDSuffix = `.${device.device_address}`;
+    if (idEnding(device)) {
+      uniqueIDSuffix = `${uniqueIDSuffix}.${idEnding(device)}`;
+    }
     const uniqueID = `${uniqueIDPrefix}.${uniqueIDSuffix}`;
     const uuid = this.api.hap.uuid.generate(uniqueID);
     let deviceObj;

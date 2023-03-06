@@ -79,7 +79,7 @@ export class RelayCurtainValve {
     this.controller.send({
       target: this.device,
       command: 0xE3E2,
-      data: { curtain: this.channel }
+      data: { curtain: this.channel },
     }, false);
   }
 

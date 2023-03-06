@@ -34,15 +34,23 @@ export class ContactSensor {
       const eventEmitter = this.listener.getChannelEventEmitter(this.area, this.channel);
       eventEmitter.on('update', (contact) => {
         if (this.nc) {
-          if (contact) this.ContactStates.Detected = Characteristic.ContactSensorState.CONTACT_DETECTED;
-          else this.ContactStates.Detected = Characteristic.ContactSensorState.CONTACT_NOT_DETECTED;
+          if (contact) {
+            this.ContactStates.Detected = Characteristic.ContactSensorState.CONTACT_DETECTED;
+          } else {
+            this.ContactStates.Detected = Characteristic.ContactSensorState.CONTACT_NOT_DETECTED;
+          }
         } else {
-          if (contact) this.ContactStates.Detected = Characteristic.ContactSensorState.CONTACT_NOT_DETECTED;
-          else this.ContactStates.Detected = Characteristic.ContactSensorState.CONTACT_DETECTED;
+          if (contact) {
+            this.ContactStates.Detected = Characteristic.ContactSensorState.CONTACT_NOT_DETECTED;
+          } else {
+            this.ContactStates.Detected = Characteristic.ContactSensorState.CONTACT_DETECTED;
+          }
         }
         this.service.getCharacteristic(Characteristic.ContactSensorState).updateValue(this.ContactStates.Detected);
         if (this.ContactStates.Detected ===
-          Characteristic.ContactSensorState.CONTACT_DETECTED) this.platform.log.debug(this.name + ' has detected contact');
+          Characteristic.ContactSensorState.CONTACT_DETECTED) {
+          this.platform.log.debug(this.name + ' has detected contact');
+        }
       });
 
       setInterval(() => {
@@ -66,7 +74,7 @@ export class DryListener {
 
   constructor(
     private readonly device: Device,
-    private readonly controller: Device
+    private readonly controller: Device,
   ) {
     // control response listener
     this.device.on(0x15CF, (command) => {

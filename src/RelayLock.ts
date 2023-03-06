@@ -50,11 +50,17 @@ export class RelayLock {
     const eventEmitter = this.listener.getChannelEventEmitter(this.channel);
     eventEmitter.on('update', (level) => {
       if (channel === this.channel) {
-        if (this.nc) this.RelayLockStates.Lock = (level === 0 ? HMBClosed : HMBOpen);
-        else this.RelayLockStates.Lock = (level === 0 ? HMBOpen : HMBClosed);
+        if (this.nc) {
+          this.RelayLockStates.Lock = (level === 0 ? HMBClosed : HMBOpen);
+        } else {
+          this.RelayLockStates.Lock = (level === 0 ? HMBOpen : HMBClosed);
+        }
         this.service.getCharacteristic(Characteristic.LockCurrentState).updateValue(this.RelayLockStates.Lock);
-        if (this.RelayLockStates.Lock === HMBClosed) this.platform.log.debug(this.name + ' is now closed');
-        else this.platform.log.debug(this.name + ' is now open');
+        if (this.RelayLockStates.Lock === HMBClosed) {
+          this.platform.log.debug(this.name + ' is now closed');
+        } else {
+          this.platform.log.debug(this.name + ' is now open');
+        }
       }
     });
   }
@@ -65,8 +71,11 @@ export class RelayLock {
     this.RelayLockStates.Target = value;
     this.service.getCharacteristic(this.platform.Characteristic.LockTargetState).updateValue(this.RelayLockStates.Target);
     if (this.nc) {
-      if (value === 0) value = 1;
-      else value = 0;
+      if (value === 0) {
+        value = 1;
+      } else {
+        value = 0;
+      }
     }
     this.controller.send({
       target: this.device,
@@ -81,7 +90,8 @@ export class RelayLock {
       } else {
         if ((value === 1) && (this.lock_timeout > 0)) {
           setTimeout(() => {
-            this.handleLockTargetStateSet(HMBClosed)}, 1000 * this.lock_timeout);
+            this.handleLockTargetStateSet(HMBClosed);
+          }, 1000 * this.lock_timeout);
         }
       }
     });

@@ -22,7 +22,7 @@ export class Sensor8in1 {
     private readonly name: string,
     private readonly controller: Device,
     private readonly device: Device,
-    private readonly listener: SensorListener
+    private readonly listener: SensorListener,
   ) {
     const Service = this.platform.Service;
     const Characteristic = this.platform.Characteristic;

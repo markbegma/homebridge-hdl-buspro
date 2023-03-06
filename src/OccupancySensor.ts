@@ -30,30 +30,38 @@ export class OccupancySensor {
     this.service.setCharacteristic(Characteristic.Name, name);
     this.service.getCharacteristic(Characteristic.OccupancyDetected)
       .onGet(this.getOn.bind(this));
-      if (area !== -1) {
-        const eventEmitter = this.listener.getChannelEventEmitter(this.area, this.channel);
-        eventEmitter.on('update', (contact) => {
-          if (this.nc) {
-            if (contact) this.OccupancyStates.Detected = Characteristic.OccupancyDetected.OCCUPANCY_DETECTED;
-            else this.OccupancyStates.Detected = Characteristic.OccupancyDetected.OCCUPANCY_NOT_DETECTED;
+    if (area !== -1) {
+      const eventEmitter = this.listener.getChannelEventEmitter(this.area, this.channel);
+      eventEmitter.on('update', (contact) => {
+        if (this.nc) {
+          if (contact) {
+            this.OccupancyStates.Detected = Characteristic.OccupancyDetected.OCCUPANCY_DETECTED;
           } else {
-            if (contact) this.OccupancyStates.Detected = Characteristic.OccupancyDetected.OCCUPANCY_NOT_DETECTED;
-            else this.OccupancyStates.Detected = Characteristic.OccupancyDetected.OCCUPANCY_DETECTED;
+            this.OccupancyStates.Detected = Characteristic.OccupancyDetected.OCCUPANCY_NOT_DETECTED;
           }
-          this.service.getCharacteristic(Characteristic.OccupancyDetected).updateValue(this.OccupancyStates.Detected);
-          if (this.OccupancyStates.Detected ===
-            Characteristic.OccupancyDetected.OCCUPANCY_DETECTED) this.platform.log.debug(this.name + ' has detected occupancy');
-        });
-  
-        setInterval(() => {
-          this.controller.send({
-            target: this.device,
-            command: 0x15CE,
-            data: { area: this.area, switch: this.channel },
-          }, false);
-        }, 1000);
-      }
+        } else {
+          if (contact) {
+            this.OccupancyStates.Detected = Characteristic.OccupancyDetected.OCCUPANCY_NOT_DETECTED;
+          } else {
+            this.OccupancyStates.Detected = Characteristic.OccupancyDetected.OCCUPANCY_DETECTED;
+          }
+        }
+        this.service.getCharacteristic(Characteristic.OccupancyDetected).updateValue(this.OccupancyStates.Detected);
+        if (this.OccupancyStates.Detected ===
+            Characteristic.OccupancyDetected.OCCUPANCY_DETECTED) {
+          this.platform.log.debug(this.name + ' has detected occupancy');
+        }
+      });
+
+      setInterval(() => {
+        this.controller.send({
+          target: this.device,
+          command: 0x15CE,
+          data: { area: this.area, switch: this.channel },
+        }, false);
+      }, 1000);
     }
+  }
 
   async getOn(): Promise<CharacteristicValue> {
     return this.OccupancyStates.Detected;

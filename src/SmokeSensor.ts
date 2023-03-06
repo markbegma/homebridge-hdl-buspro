@@ -34,15 +34,23 @@ export class SmokeSensor {
       const eventEmitter = this.listener.getChannelEventEmitter(this.area, this.channel);
       eventEmitter.on('update', (contact) => {
         if (this.nc) {
-          if (contact) this.SmokeStates.Detected = Characteristic.SmokeDetected.SMOKE_DETECTED;
-          else this.SmokeStates.Detected = Characteristic.SmokeDetected.SMOKE_NOT_DETECTED;
+          if (contact) {
+            this.SmokeStates.Detected = Characteristic.SmokeDetected.SMOKE_DETECTED;
+          } else {
+            this.SmokeStates.Detected = Characteristic.SmokeDetected.SMOKE_NOT_DETECTED;
+          }
         } else {
-          if (contact) this.SmokeStates.Detected = Characteristic.SmokeDetected.SMOKE_NOT_DETECTED;
-          else this.SmokeStates.Detected = Characteristic.SmokeDetected.SMOKE_DETECTED;
+          if (contact) {
+            this.SmokeStates.Detected = Characteristic.SmokeDetected.SMOKE_NOT_DETECTED;
+          } else {
+            this.SmokeStates.Detected = Characteristic.SmokeDetected.SMOKE_DETECTED;
+          }
         }
         this.service.getCharacteristic(Characteristic.SmokeDetected).updateValue(this.SmokeStates.Detected);
         if (this.SmokeStates.Detected ===
-          Characteristic.SmokeDetected.SMOKE_DETECTED) this.platform.log.debug(this.name + ' has detected smoke');
+          Characteristic.SmokeDetected.SMOKE_DETECTED) {
+          this.platform.log.debug(this.name + ' has detected smoke');
+        }
       });
 
       setInterval(() => {
