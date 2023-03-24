@@ -4,12 +4,13 @@ import { EventEmitter } from 'events';
 import Device from 'smart-bus';
 
 import { HDLBusproHomebridge } from './HDLPlatform';
+import { ABCDevice, ABCListener } from './ABC';
 
 const HMBOpening = 1;
 const HMBClosing = 0;
 const HMBStop = 2;
 
-export class RelayCurtains {
+export class RelayCurtains extends ABCDevice {
   private service: Service;
   private RelayCurtainsStates = {
     PositionState: HMBStop,
@@ -36,6 +37,7 @@ export class RelayCurtains {
     private readonly duration: number,
     private readonly precision: number,
   ) {
+    super();
     const Service = this.platform.Service;
     const Characteristic = this.platform.Characteristic;
     this.accessory.getService(Service.AccessoryInformation)!
@@ -184,7 +186,7 @@ export class RelayCurtains {
   }
 }
 
-export class RelayCurtainListener {
+export class RelayCurtainListener extends ABCListener {
   private curtainsMap = new Map();
   private eventEmitter = new EventEmitter();
 
@@ -192,6 +194,7 @@ export class RelayCurtainListener {
     private readonly device: Device,
     private readonly controller: Device,
   ) {
+    super(device, controller);
     // control response listener
     this.device.on(0xE3E1, (command) => {
       const data = command.data;

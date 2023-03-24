@@ -3,8 +3,9 @@ import { EventEmitter } from 'events';
 import Device from 'smart-bus';
 
 import { HDLBusproHomebridge } from './HDLPlatform';
+import { ABCDevice, ABCListener } from './ABC';
 
-export class RelayLightbulb {
+export class RelayLightbulb extends ABCDevice {
   private service: Service;
   private RelayLightbulbStates = {
     On: false,
@@ -19,6 +20,7 @@ export class RelayLightbulb {
     private readonly listener: RelayListener,
     private readonly channel: number,
   ) {
+    super();
     const Service = this.platform.Service;
     const Characteristic = this.platform.Characteristic;
     this.accessory.getService(Service.AccessoryInformation)!
@@ -63,7 +65,7 @@ export class RelayLightbulb {
   }
 }
 
-export class RelayListener {
+export class RelayListener extends ABCListener {
   private channelsMap = new Map();
   private eventEmitter = new EventEmitter();
 
@@ -71,6 +73,7 @@ export class RelayListener {
     private readonly device: Device,
     private readonly controller: Device,
   ) {
+    super(device, controller);
     // control response listener
     this.device.on(0x0032, (command) => {
       const data = command.data;

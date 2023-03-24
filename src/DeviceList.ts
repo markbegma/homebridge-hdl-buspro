@@ -1,3 +1,4 @@
+import { ABCDevice, ABCListener } from './ABC';
 import { RelayLightbulb, RelayListener } from './RelayLightbulb';
 import { RelayDimmableLightbulb } from './RelayDimmableLightbulb';
 import { Sensor8in1, SensorListener } from './Sensor8in1';
@@ -9,65 +10,72 @@ import { ContactSensor, DryListener } from './ContactSensor';
 import { RelayCurtains, RelayCurtainListener } from './RelayCurtains';
 import { RelayCurtainValve } from './RelayCurtainValve';
 
-export const deviceTypeMap = {
+interface DeviceType {
+  deviceClass: ABCDevice;
+  listener: ABCListener;
+  uniqueArgs: (config: Record<string, any>) => any[];
+  idEnding: (config: Record<string, any>) => string;
+}
+
+export const deviceTypeMap: {[key: string]: DeviceType} = {
   'relaylightbulb': {
     deviceClass: RelayLightbulb,
     listener: RelayListener,
-    uniqueArgs: (device) => [device.channel],
-    idEnding: (device) => `${device.channel}`,
+    uniqueArgs: (config) => [config.channel],
+    idEnding: (config) => `${config.channel}`,
   },
   'relaydimmablelightbulb': {
     deviceClass: RelayDimmableLightbulb,
     listener: RelayListener,
-    uniqueArgs: (device) => [device.channel],
-    idEnding: (device) => `${device.channel}`,
+    uniqueArgs: (config) => [config.channel],
+    idEnding: (config) => `${config.channel}`,
   },
   'sensor8in1': {
     deviceClass: Sensor8in1,
     listener: SensorListener,
-    uniqueArgs: () => [],
-    idEnding: () => '',
+    uniqueArgs: (config) => [],
+    idEnding: (config) => '',
   },
   'relaylock': {
     deviceClass: RelayLock,
     listener: RelayListener,
-    uniqueArgs: (device) => [device.channel, device.nc, device.lock_timeout],
-    idEnding: (device) => `${device.channel}`,
+    uniqueArgs: (config) => [config.channel, config.nc, config.lock_timeout],
+    idEnding: (config) => `${config.channel}`,
   },
   'relaycurtains': {
     deviceClass: RelayCurtains,
     listener: RelayCurtainListener,
-    uniqueArgs: (device) => [device.channel, device.nc, device.duration, device.curtains_precision],
-    idEnding: (device) => `${device.channel}`,
+    uniqueArgs: (config) => [config.channel, config.nc, config.duration, config.curtains_precision],
+    idEnding: (config) => `${config.channel}`,
   },
   'relaycurtainvalve': {
     deviceClass: RelayCurtainValve,
     listener: RelayCurtainListener,
-    uniqueArgs: (device) => [device.channel, device.nc, device.valvetype],
-    idEnding: (device) => `${device.channel}`,
+    uniqueArgs: (config) => [config.channel, config.nc, config.valvetype],
+    idEnding: (config) => `${config.channel}`,
   },
   'contactsensor': {
     deviceClass: ContactSensor,
     listener: DryListener,
-    uniqueArgs: (device) => [device.area, device.channel, device.nc],
-    idEnding: (device) => `${device.area}.${device.channel}`,
+    uniqueArgs: (config) => [config.area, config.channel, config.nc],
+    idEnding: (config) => `${config.area}.${config.channel}`,
   },
   'leaksensor': {
     deviceClass: LeakSensor,
     listener: DryListener,
-    uniqueArgs: (device) => [device.area, device.channel, device.nc],
-    idEnding: (device) => `${device.area}.${device.channel}`,
+    uniqueArgs: (config) => [config.area, config.channel, config.nc],
+    idEnding: (config) => `${config.area}.${config.channel}`,
   },
   'smokesensor': {
     deviceClass: SmokeSensor,
     listener: DryListener,
-    uniqueArgs: (device) => [device.area, device.channel, device.nc],
-    idEnding: (device) => `${device.area}.${device.channel}`,
+    uniqueArgs: (config) => [config.area, config.channel, config.nc],
+    idEnding: (config) => `${config.area}.${config.channel}`,
   },
   'occupancysensor': {
     deviceClass: OccupancySensor,
     listener: DryListener,
-    uniqueArgs: (device) => [device.area, device.channel, device.nc],
-    idEnding: (device) => `${device.area}.${device.channel}`,
+    uniqueArgs: (config) => [config.area, config.channel, config.nc],
+    idEnding: (config) => `${config.area}.${config.channel}`,
   },
 };

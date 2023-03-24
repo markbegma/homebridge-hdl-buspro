@@ -3,8 +3,9 @@ import Device from 'smart-bus';
 
 import { HDLBusproHomebridge } from './HDLPlatform';
 import { RelayCurtainListener } from './RelayCurtains';
+import { ABCDevice } from './ABC';
 
-export class RelayCurtainValve {
+export class RelayCurtainValve extends ABCDevice {
   private service: Service;
   private RelayCurtainValveStates = {
     ValveType: 0,
@@ -29,6 +30,7 @@ export class RelayCurtainValve {
     private readonly nc: boolean,
     private readonly valvetype: number,
   ) {
+    super();
     const Service = this.platform.Service;
     const Characteristic = this.platform.Characteristic;
     this.accessory.getService(Service.AccessoryInformation)!

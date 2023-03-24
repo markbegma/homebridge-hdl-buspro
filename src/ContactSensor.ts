@@ -3,8 +3,9 @@ import { EventEmitter } from 'events';
 import Device from 'smart-bus';
 
 import { HDLBusproHomebridge } from './HDLPlatform';
+import { ABCDevice, ABCListener } from './ABC';
 
-export class ContactSensor {
+export class ContactSensor extends ABCDevice {
   private service: Service;
   private ContactStates = {
     Detected: this.platform.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED,
@@ -21,6 +22,7 @@ export class ContactSensor {
     private readonly channel: number,
     private readonly nc: boolean,
   ) {
+    super();
     const Service = this.platform.Service;
     const Characteristic = this.platform.Characteristic;
     this.accessory.getService(Service.AccessoryInformation)!
@@ -68,7 +70,7 @@ export class ContactSensor {
   }
 }
 
-export class DryListener {
+export class DryListener extends ABCListener {
   private channelsMap = new Map<string, boolean>();
   private eventEmitter = new EventEmitter();
 
@@ -76,6 +78,7 @@ export class DryListener {
     private readonly device: Device,
     private readonly controller: Device,
   ) {
+    super(device, controller);
     // control response listener
     this.device.on(0x15CF, (command) => {
       const data = command.data;

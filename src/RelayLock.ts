@@ -3,12 +3,13 @@ import Device from 'smart-bus';
 
 import { HDLBusproHomebridge } from './HDLPlatform';
 import { RelayListener } from './RelayLightbulb';
+import { ABCDevice } from './ABC';
 
 
 const HMBOpen = 0;
 const HMBClosed = 1;
 
-export class RelayLock {
+export class RelayLock extends ABCDevice {
   private service: Service;
   private RelayLockStates = {
     Lock: HMBClosed,
@@ -29,6 +30,7 @@ export class RelayLock {
     private readonly nc: boolean,
     private readonly lock_timeout: number,
   ) {
+    super();
     const Service = this.platform.Service;
     const Characteristic = this.platform.Characteristic;
     this.accessory.getService(Service.AccessoryInformation)!

@@ -3,6 +3,7 @@ import Bus from 'smart-bus';
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 import { deviceTypeMap } from './DeviceList';
+import { ABCDevice, ABCListener } from './ABC';
 
 export class HDLBusproHomebridge implements DynamicPlatformPlugin {
   public readonly Service: typeof Service = this.api.hap.Service;
@@ -42,6 +43,12 @@ export class HDLBusproHomebridge implements DynamicPlatformPlugin {
         const addressedDeviceMap = new Map();
         const uniqueIDPrefix = `${ip}:${port}.${subnet_number}`;
         for (const device of subnet.devices) {
+          const deviceType = (device.device_type === 'drycontact') ? device.drycontact_type : device.device_type;
+          const deviceTypeConfig = deviceTypeMap[deviceType];
+          if (!deviceTypeConfig) {
+            this.log.error('Invalid device type:', deviceType);
+            return;
+          }
           this.discoverDevice(busObj, subnet, device, uniqueIDPrefix, controllerObj, addressedDeviceMap);
         }
       }
@@ -56,7 +63,7 @@ export class HDLBusproHomebridge implements DynamicPlatformPlugin {
       this.log.error('Invalid device type:', deviceType);
       return;
     }
-    const { deviceClass, listenerClass, uniqueArgs, idEnding } = deviceTypeConfig;
+    const { deviceClass, listener, uniqueArgs, idEnding } = deviceTypeConfig;
     let uniqueIDSuffix = `.${device.device_address}`;
     if (idEnding(device)) {
       uniqueIDSuffix = `${uniqueIDSuffix}.${idEnding(device)}`;
@@ -69,7 +76,7 @@ export class HDLBusproHomebridge implements DynamicPlatformPlugin {
       ({ deviceObj, listenerObj } = addressedDeviceMap.get(deviceAddress));
     } else {
       deviceObj = busObj.device(deviceAddress);
-      listenerObj = listenerClass(deviceObj, controllerObj);
+      listenerObj = new listener(deviceObj, controllerObj);
       addressedDeviceMap.set(deviceAddress, { deviceObj, listenerObj });
     }
     const commonArgs = [device.device_name, controllerObj, deviceObj, listenerObj];

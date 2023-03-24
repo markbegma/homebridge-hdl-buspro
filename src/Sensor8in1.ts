@@ -2,8 +2,9 @@ import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
 import Device from 'smart-bus';
 
 import { HDLBusproHomebridge } from './HDLPlatform';
+import { ABCDevice, ABCListener } from './ABC';
 
-export class Sensor8in1 {
+export class Sensor8in1 extends ABCDevice {
   private temp_service: Service;
   private brightness_service: Service;
   private motion_service: Service;
@@ -24,6 +25,7 @@ export class Sensor8in1 {
     private readonly device: Device,
     private readonly listener: SensorListener,
   ) {
+    super();
     const Service = this.platform.Service;
     const Characteristic = this.platform.Characteristic;
     this.accessory.getService(Service.AccessoryInformation)!
@@ -94,4 +96,11 @@ export class Sensor8in1 {
   }
 }
 
-export class SensorListener {}
+export class SensorListener extends ABCListener {
+  constructor(
+    private readonly device: Device,
+    private readonly controller: Device,
+    ) {
+    super(device, controller);
+  }
+}
