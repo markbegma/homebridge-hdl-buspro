@@ -70,7 +70,7 @@ export class ContactSensor extends ABCDevice {
   }
 }
 
-export class DryListener extends ABCListener {
+export class DryListener implements ABCListener {
   private channelsMap = new Map<string, boolean>();
   private eventEmitter = new EventEmitter();
 
@@ -78,7 +78,6 @@ export class DryListener extends ABCListener {
     private readonly device: Device,
     private readonly controller: Device,
   ) {
-    super(device, controller);
     // control response listener
     this.device.on(0x15CF, (command) => {
       const data = command.data;

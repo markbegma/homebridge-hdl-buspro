@@ -65,7 +65,7 @@ export class RelayLightbulb extends ABCDevice {
   }
 }
 
-export class RelayListener extends ABCListener {
+export class RelayListener implements ABCListener {
   private channelsMap = new Map();
   private eventEmitter = new EventEmitter();
 
@@ -73,7 +73,6 @@ export class RelayListener extends ABCListener {
     private readonly device: Device,
     private readonly controller: Device,
   ) {
-    super(device, controller);
     // control response listener
     this.device.on(0x0032, (command) => {
       const data = command.data;

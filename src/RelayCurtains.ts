@@ -186,7 +186,7 @@ export class RelayCurtains extends ABCDevice {
   }
 }
 
-export class RelayCurtainListener extends ABCListener {
+export class RelayCurtainListener implements ABCListener {
   private curtainsMap = new Map();
   private eventEmitter = new EventEmitter();
 
@@ -194,7 +194,6 @@ export class RelayCurtainListener extends ABCListener {
     private readonly device: Device,
     private readonly controller: Device,
   ) {
-    super(device, controller);
     // control response listener
     this.device.on(0xE3E1, (command) => {
       const data = command.data;

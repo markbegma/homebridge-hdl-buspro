@@ -96,11 +96,9 @@ export class Sensor8in1 extends ABCDevice {
   }
 }
 
-export class SensorListener extends ABCListener {
+export class SensorListener implements ABCListener {
   constructor(
     private readonly device: Device,
     private readonly controller: Device,
-    ) {
-    super(device, controller);
-  }
+    ) { }
 }

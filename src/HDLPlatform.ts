@@ -41,7 +41,7 @@ export class HDLBusproHomebridge implements DynamicPlatformPlugin {
         const cd_number: number = subnet.cd_number;
         const controllerObj: Device = busObj.controller(`${subnet}.${cd_number}`);
         const addressedDeviceMap = new Map();
-        const uniqueIDPrefix: string = `${ip}:${port}.${subnet_number}`;
+        const uniqueIDPrefix = `${ip}:${port}.${subnet_number}`;
         for (const device of subnet.devices) {
           this.discoverDevice(busObj, subnet, device, uniqueIDPrefix, controllerObj, addressedDeviceMap);
         }
@@ -50,7 +50,7 @@ export class HDLBusproHomebridge implements DynamicPlatformPlugin {
   }
 
   discoverDevice(busObj: Bus, subnet: number, device, uniqueIDPrefix: string, controllerObj: Device, addressedDeviceMap: Map<any, any>) {
-    const deviceAddress: string = `${subnet}.${device.device_address}`;
+    const deviceAddress = `${subnet}.${device.device_address}`;
     const deviceType: string = (device.device_type === 'drycontact') ? device.drycontact_type : device.device_type;
     const deviceTypeConfig: DeviceType<any, any> = deviceTypeMap[deviceType];
     if (!deviceTypeConfig) {
@@ -58,11 +58,11 @@ export class HDLBusproHomebridge implements DynamicPlatformPlugin {
       return;
     }
     const { deviceClass, listener, uniqueArgs, idEnding } = deviceTypeConfig;
-    let uniqueIDSuffix: string = `.${device.device_address}`;
+    let uniqueIDSuffix = `.${device.device_address}`;
     if (idEnding(device)) {
       uniqueIDSuffix = `${uniqueIDSuffix}.${idEnding(device)}`;
     }
-    const uniqueID: string = `${uniqueIDPrefix}.${uniqueIDSuffix}`;
+    const uniqueID = `${uniqueIDPrefix}.${uniqueIDSuffix}`;
     const uuid: string = this.api.hap.uuid.generate(uniqueID);
     let deviceObj: ABCDevice;
     let listenerObj: ABCListener;

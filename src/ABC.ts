@@ -1,9 +1,7 @@
 export abstract class ABCDevice {
     // Define abstract methods or properties here
-    constructor() {}
   }
   
-  export class ABCListener {
+  export abstract class ABCListener {
     // Define abstract methods or properties here
-    constructor(deviceObj, controllerObj) {};
   }
