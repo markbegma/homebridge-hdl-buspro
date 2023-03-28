@@ -10,14 +10,15 @@ import { ContactSensor, DryListener } from './ContactSensor';
 import { RelayCurtains, RelayCurtainListener } from './RelayCurtains';
 import { RelayCurtainValve } from './RelayCurtainValve';
 
-interface DeviceType {
-  deviceClass: ABCDevice;
-  listener: ABCListener;
+export interface DeviceType<T extends ABCDevice, U extends ABCListener> {
+  deviceClass: new (...args: any[]) => T;
+  listener: new (...args: any[]) => U;
   uniqueArgs: (config: Record<string, any>) => any[];
   idEnding: (config: Record<string, any>) => string;
 }
 
-export const deviceTypeMap: {[key: string]: DeviceType} = {
+
+export const deviceTypeMap: {[key: string]: DeviceType<any, any>} = {
   'relaylightbulb': {
     deviceClass: RelayLightbulb,
     listener: RelayListener,
