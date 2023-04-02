@@ -1,10 +1,10 @@
 import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
-import Device from 'smart-bus';
+import { Device } from 'smart-bus';
 
 import { HDLBusproHomebridge } from './HDLPlatform';
 import { ABCDevice, ABCListener } from './ABC';
 
-export class Sensor8in1 extends ABCDevice {
+export class Sensor8in1 implements ABCDevice {
   private temp_service: Service;
   private brightness_service: Service;
   private motion_service: Service;
@@ -25,7 +25,6 @@ export class Sensor8in1 extends ABCDevice {
     private readonly device: Device,
     private readonly listener: SensorListener,
   ) {
-    super();
     const Service = this.platform.Service;
     const Characteristic = this.platform.Characteristic;
     this.accessory.getService(Service.AccessoryInformation)!
@@ -56,19 +55,19 @@ export class Sensor8in1 extends ABCDevice {
 
       this.SensorStates.Temperature = data.temperature;
       this.temp_service.getCharacteristic(Characteristic.CurrentTemperature).updateValue(this.SensorStates.Temperature);
-      this.platform.log.debug(this.name + ' updated temperature is ', this.SensorStates.Temperature);
+      //this.platform.log.debug(this.name + ' updated temperature is ', this.SensorStates.Temperature);
 
       this.SensorStates.Brightness = data.brightness + 0.0001;
       this.brightness_service.getCharacteristic(Characteristic.CurrentAmbientLightLevel).updateValue(this.SensorStates.Brightness);
-      this.platform.log.debug(this.name + ' updated brightness is ', this.SensorStates.Brightness);
+      //this.platform.log.debug(this.name + ' updated brightness is ', this.SensorStates.Brightness);
 
       this.SensorStates.Motion = data.movement;
       this.motion_service.getCharacteristic(Characteristic.MotionDetected).updateValue(this.SensorStates.Motion);
-      this.platform.log.debug(this.name + ' motion status = ', this.SensorStates.Motion);
+      //this.platform.log.debug(this.name + ' motion status = ', this.SensorStates.Motion);
 
       this.SensorStates.Sound = !data.sonic;
       this.sound_service.getCharacteristic(Characteristic.Mute).updateValue(this.SensorStates.Sound);
-      this.platform.log.debug(this.name + ' mute status = ', this.SensorStates.Sound);
+      //this.platform.log.debug(this.name + ' mute status = ', this.SensorStates.Sound);
     });
 
     setInterval(() => {
@@ -100,5 +99,5 @@ export class SensorListener implements ABCListener {
   constructor(
     private readonly device: Device,
     private readonly controller: Device,
-    ) { }
+  ) {}
 }

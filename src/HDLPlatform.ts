@@ -1,4 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from 'homebridge';
+import SmartBus = require('smart-bus');
 import { Bus, Device } from 'smart-bus';
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
@@ -32,25 +35,31 @@ export class HDLBusproHomebridge implements DynamicPlatformPlugin {
     for (const bus of this.config.buses) {
       const ip: string = bus.bus_IP;
       const port: number = bus.bus_port;
-      const busObj: Bus = new Bus({
+      const busObj: Bus = new SmartBus({
         gateway: ip,
         port: port,
       });
       for (const subnet of bus.subnets) {
         const subnet_number: number = subnet.subnet_number;
         const cd_number: number = subnet.cd_number;
-        const controllerObj: Device = busObj.controller(`${subnet}.${cd_number}`);
+        const controllerObj: Device = busObj.controller(`${subnet_number}.${cd_number}`);
         const addressedDeviceMap = new Map();
         const uniqueIDPrefix = `${ip}:${port}.${subnet_number}`;
         for (const device of subnet.devices) {
-          this.discoverDevice(busObj, subnet, device, uniqueIDPrefix, controllerObj, addressedDeviceMap);
+          this.discoverDevice(busObj, subnet_number, device, uniqueIDPrefix, controllerObj, addressedDeviceMap);
         }
       }
     }
   }
 
-  discoverDevice(busObj: Bus, subnet: number, device, uniqueIDPrefix: string, controllerObj: Device, addressedDeviceMap: Map<any, any>) {
-    const deviceAddress = `${subnet}.${device.device_address}`;
+  discoverDevice(busObj: Bus,
+    subnet_number: number,
+    device,
+    uniqueIDPrefix: string,
+    controllerObj: Device,
+    addressedDeviceMap: Map<any, any>,
+  ) {
+    const deviceAddress = `${subnet_number}.${device.device_address}`;
     const deviceType: string = (device.device_type === 'drycontact') ? device.drycontact_type : device.device_type;
     const deviceTypeConfig: DeviceType<any, any> = deviceTypeMap[deviceType];
     if (!deviceTypeConfig) {
@@ -85,8 +94,8 @@ function buildDevice(
   deviceClass: new (...args: any[]) => ABCDevice,
   commonArgs: any[],
   uniqueArgs: any[],
-  uuid: string
-  ) {
+  uuid: string,
+) {
   if (accessory) {
     platform.log.info('Restoring existing accessory from cache:', accessory.displayName);
   } else {

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { ABCDevice, ABCListener } from './ABC';
 import { RelayLightbulb, RelayListener } from './RelayLightbulb';
 import { RelayDimmableLightbulb } from './RelayDimmableLightbulb';
@@ -34,8 +36,8 @@ export const deviceTypeMap: {[key: string]: DeviceType<any, any>} = {
   'sensor8in1': {
     deviceClass: Sensor8in1,
     listener: SensorListener,
-    uniqueArgs: (config) => [],
-    idEnding: (config) => '',
+    uniqueArgs: () => [],
+    idEnding: () => '',
   },
   'relaylock': {
     deviceClass: RelayLock,

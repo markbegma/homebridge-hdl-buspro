@@ -1,11 +1,11 @@
 import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
-import Device from 'smart-bus';
+import { Device } from 'smart-bus';
 
 import { HDLBusproHomebridge } from './HDLPlatform';
 import { DryListener } from './ContactSensor';
 import { ABCDevice } from './ABC';
 
-export class SmokeSensor extends ABCDevice {
+export class SmokeSensor implements ABCDevice {
   private service: Service;
   private SmokeStates = {
     Detected: this.platform.Characteristic.SmokeDetected.SMOKE_NOT_DETECTED,
@@ -22,7 +22,6 @@ export class SmokeSensor extends ABCDevice {
     private readonly channel: number,
     private readonly nc: boolean,
   ) {
-    super();
     const Service = this.platform.Service;
     const Characteristic = this.platform.Characteristic;
     this.accessory.getService(Service.AccessoryInformation)!

@@ -1,11 +1,11 @@
 import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
-import Device from 'smart-bus';
+import { Device } from 'smart-bus';
 
 import { HDLBusproHomebridge } from './HDLPlatform';
 import { RelayCurtainListener } from './RelayCurtains';
 import { ABCDevice } from './ABC';
 
-export class RelayCurtainValve extends ABCDevice {
+export class RelayCurtainValve implements ABCDevice {
   private service: Service;
   private RelayCurtainValveStates = {
     ValveType: 0,
@@ -30,7 +30,6 @@ export class RelayCurtainValve extends ABCDevice {
     private readonly nc: boolean,
     private readonly valvetype: number,
   ) {
-    super();
     const Service = this.platform.Service;
     const Characteristic = this.platform.Characteristic;
     this.accessory.getService(Service.AccessoryInformation)!
@@ -110,7 +109,9 @@ export class RelayCurtainValve extends ABCDevice {
         if (err) {
           // Revert to the old value
           this.RelayCurtainValveStates.Active = oldValue;
-          this.platform.log.error(`Error setting Active state for ${this.device.name}: ${err.message}`);
+          this.platform.log.error(`Error setting Active state for ${this.name}: ${err.message}`);
+        } else {
+          this.platform.log.debug('Successfully sent command to ' + this.name);
         }
       });
     }

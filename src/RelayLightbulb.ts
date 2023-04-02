@@ -1,11 +1,11 @@
 import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
 import { EventEmitter } from 'events';
-import Device from 'smart-bus';
+import { Device } from 'smart-bus';
 
 import { HDLBusproHomebridge } from './HDLPlatform';
 import { ABCDevice, ABCListener } from './ABC';
 
-export class RelayLightbulb extends ABCDevice {
+export class RelayLightbulb implements ABCDevice {
   private service: Service;
   private RelayLightbulbStates = {
     On: false,
@@ -20,7 +20,6 @@ export class RelayLightbulb extends ABCDevice {
     private readonly listener: RelayListener,
     private readonly channel: number,
   ) {
-    super();
     const Service = this.platform.Service;
     const Characteristic = this.platform.Characteristic;
     this.accessory.getService(Service.AccessoryInformation)!
@@ -54,7 +53,9 @@ export class RelayLightbulb extends ABCDevice {
       if (err) {
         // Revert to the old value
         this.RelayLightbulbStates.On = oldValue;
-        this.platform.log.error(`Error setting On state for ${this.device.name}: ${err.message}`);
+        this.platform.log.error(`Error setting On state for ${this.name}: ${err.message}`);
+      } else {
+        this.platform.log.debug('Successfully sent command to ' + this.name);
       }
     });
   }
@@ -84,9 +85,9 @@ export class RelayListener implements ABCListener {
     // status request response listener
     this.device.on(0x0034, (command) => {
       const data = command.data;
-      for (const channelInfo of data) {
-        this.channelsMap.set(channelInfo.channel, channelInfo.level);
-        this.eventEmitter.emit(`update_${channelInfo.channel}`, channelInfo.level);
+      for (const channelInfo of data.channels) {
+        this.channelsMap.set(channelInfo.number, channelInfo.level);
+        this.eventEmitter.emit(`update_${channelInfo.number}`, channelInfo.level);
       }
     });
     // status request

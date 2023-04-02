@@ -9,7 +9,7 @@ import { ABCDevice } from './ABC';
 const HMBOpen = 0;
 const HMBClosed = 1;
 
-export class RelayLock extends ABCDevice {
+export class RelayLock implements ABCDevice {
   private service: Service;
   private RelayLockStates = {
     Lock: HMBClosed,
@@ -30,7 +30,6 @@ export class RelayLock extends ABCDevice {
     private readonly nc: boolean,
     private readonly lock_timeout: number,
   ) {
-    super();
     const Service = this.platform.Service;
     const Characteristic = this.platform.Characteristic;
     this.accessory.getService(Service.AccessoryInformation)!
@@ -90,6 +89,7 @@ export class RelayLock extends ABCDevice {
         this.service.getCharacteristic(this.platform.Characteristic.LockTargetState).updateValue(this.RelayLockStates.Target);
         this.platform.log.error(`Error setting LockTarget state for ${this.device.name}: ${err.message}`);
       } else {
+        this.platform.log.debug('Successfully sent command to ' + this.name);
         if ((value === 1) && (this.lock_timeout > 0)) {
           setTimeout(() => {
             this.handleLockTargetStateSet(HMBClosed);

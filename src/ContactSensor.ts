@@ -1,11 +1,11 @@
 import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
 import { EventEmitter } from 'events';
-import Device from 'smart-bus';
+import { Device } from 'smart-bus';
 
 import { HDLBusproHomebridge } from './HDLPlatform';
 import { ABCDevice, ABCListener } from './ABC';
 
-export class ContactSensor extends ABCDevice {
+export class ContactSensor implements ABCDevice {
   private service: Service;
   private ContactStates = {
     Detected: this.platform.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED,
@@ -22,7 +22,6 @@ export class ContactSensor extends ABCDevice {
     private readonly channel: number,
     private readonly nc: boolean,
   ) {
-    super();
     const Service = this.platform.Service;
     const Characteristic = this.platform.Characteristic;
     this.accessory.getService(Service.AccessoryInformation)!
