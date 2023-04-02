@@ -1,76 +1,64 @@
-/* eslint-disable max-len */
-/* eslint-disable curly */
 import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
+import { EventEmitter } from 'events';
+import { Device } from 'smart-bus';
 
 import { HDLBusproHomebridge } from './HDLPlatform';
-import Bus from 'smart-bus';
+import { ABCDevice, ABCListener } from './ABC';
 
-export class ContactSensor {
+export class ContactSensor implements ABCDevice {
   private service: Service;
   private ContactStates = {
     Detected: this.platform.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED,
   };
 
-  private bus: Bus;
-  private cdnstr: string;
-  private devicestr: string;
-
   constructor(
     private readonly platform: HDLBusproHomebridge,
     private readonly accessory: PlatformAccessory,
     private readonly name: string,
-    private readonly ip: string,
-    private readonly port: number,
-    private readonly subnet: number,
-    private readonly cdn: string,
-    private readonly device: string,
+    private readonly controller: Device,
+    private readonly device: Device,
+    private readonly listener: DryListener,
     private readonly area: number,
     private readonly channel: number,
     private readonly nc: boolean,
   ) {
-    this.accessory.getService(this.platform.Service.AccessoryInformation)!
-      .setCharacteristic(this.platform.Characteristic.Manufacturer, 'HDL');
+    const Service = this.platform.Service;
+    const Characteristic = this.platform.Characteristic;
+    this.accessory.getService(Service.AccessoryInformation)!
+      .setCharacteristic(Characteristic.Manufacturer, 'HDL');
     this.service =
-    this.accessory.getService(this.platform.Service.ContactSensor) || this.accessory.addService(this.platform.Service.ContactSensor);
-    this.service.setCharacteristic(this.platform.Characteristic.Name, name);
-    this.service.getCharacteristic(this.platform.Characteristic.ContactSensorState)
+      this.accessory.getService(Service.ContactSensor) || this.accessory.addService(Service.ContactSensor);
+    this.service.setCharacteristic(Characteristic.Name, name);
+    this.service.getCharacteristic(Characteristic.ContactSensorState)
       .onGet(this.getOn.bind(this));
-    this.cdnstr = String(subnet).concat('.', String(cdn));
-    this.devicestr = String(subnet).concat('.', String(device));
-    this.bus = new Bus({
-      device: this.cdnstr,
-      gateway: this.ip,
-      port: this.port,
-    });
-    if (area===-1) {
-      false;
-    } else {
-      // eslint-disable-next-line @typescript-eslint/no-this-alias
-      const that = this;
-      this.bus.device(this.devicestr).on(0x15CF, (command) => {
-        const data = command.data;
-        const area = data.area;
-        const channel = data.switch;
-        const contact = data.contact;
-        if ((area === that.area) && (channel === that.channel)) {
-          if (this.nc) {
-            if (contact) that.ContactStates.Detected = this.platform.Characteristic.ContactSensorState.CONTACT_DETECTED;
-            else that.ContactStates.Detected = this.platform.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED;
+    if (area !== -1) {
+      const eventEmitter = this.listener.getChannelEventEmitter(this.area, this.channel);
+      eventEmitter.on('update', (contact) => {
+        if (this.nc) {
+          if (contact) {
+            this.ContactStates.Detected = Characteristic.ContactSensorState.CONTACT_DETECTED;
           } else {
-            if (contact) that.ContactStates.Detected = this.platform.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED;
-            else that.ContactStates.Detected = this.platform.Characteristic.ContactSensorState.CONTACT_DETECTED;
+            this.ContactStates.Detected = Characteristic.ContactSensorState.CONTACT_NOT_DETECTED;
+          }
+        } else {
+          if (contact) {
+            this.ContactStates.Detected = Characteristic.ContactSensorState.CONTACT_NOT_DETECTED;
+          } else {
+            this.ContactStates.Detected = Characteristic.ContactSensorState.CONTACT_DETECTED;
           }
         }
-        that.service.getCharacteristic(that.platform.Characteristic.ContactSensorState).updateValue(that.ContactStates.Detected);
-        if (that.ContactStates.Detected === this.platform.Characteristic.ContactSensorState.CONTACT_DETECTED) that.platform.log.debug(that.name + ' has detected contact');
+        this.service.getCharacteristic(Characteristic.ContactSensorState).updateValue(this.ContactStates.Detected);
+        if (this.ContactStates.Detected ===
+          Characteristic.ContactSensorState.CONTACT_DETECTED) {
+          this.platform.log.debug(this.name + ' has detected contact');
+        }
       });
 
       setInterval(() => {
-        this.bus.send({
-          sender: this.cdnstr,
-          target: this.devicestr,
+        this.controller.send({
+          target: this.device,
           command: 0x15CE,
-          data: {area: this.area, switch: this.channel},
+          data: { area: this.area, switch: this.channel },
         }, false);
       }, 1000);
     }
@@ -78,5 +66,36 @@ export class ContactSensor {
 
   async getOn(): Promise<CharacteristicValue> {
     return this.ContactStates.Detected;
+  }
+}
+
+export class DryListener implements ABCListener {
+  private channelsMap = new Map<string, boolean>();
+  private eventEmitter = new EventEmitter();
+
+  constructor(
+    private readonly device: Device,
+    private readonly controller: Device,
+  ) {
+    // control response listener
+    this.device.on(0x15CF, (command) => {
+      const data = command.data;
+      const area = data.area;
+      const channel = data.switch;
+      const contact = data.contact;
+      const key = `${area}_${channel}`;
+      this.channelsMap.set(key, contact);
+      this.eventEmitter.emit(`update_${key}`, contact);
+    });
+  }
+
+  // This function returns an EventEmitter for the specified area and channel
+  getChannelEventEmitter(area: number, channel: number) {
+    const key = `${area}_${channel}`;
+    const eventEmitter = new EventEmitter();
+    this.eventEmitter.on(`update_${key}`, (contact) => {
+      eventEmitter.emit('update', contact);
+    });
+    return eventEmitter;
   }
 }

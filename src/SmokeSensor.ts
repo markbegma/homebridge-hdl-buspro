@@ -5,10 +5,10 @@ import { HDLBusproHomebridge } from './HDLPlatform';
 import { DryListener } from './ContactSensor';
 import { ABCDevice } from './ABC';
 
-export class LeakSensor implements ABCDevice {
+export class SmokeSensor implements ABCDevice {
   private service: Service;
-  private LeakStates = {
-    Detected: this.platform.Characteristic.LeakDetected.LEAK_NOT_DETECTED,
+  private SmokeStates = {
+    Detected: this.platform.Characteristic.SmokeDetected.SMOKE_NOT_DETECTED,
   };
 
   constructor(
@@ -27,30 +27,30 @@ export class LeakSensor implements ABCDevice {
     this.accessory.getService(Service.AccessoryInformation)!
       .setCharacteristic(Characteristic.Manufacturer, 'HDL');
     this.service =
-    this.accessory.getService(Service.LeakSensor) || this.accessory.addService(Service.LeakSensor);
+      this.accessory.getService(Service.SmokeSensor) || this.accessory.addService(Service.SmokeSensor);
     this.service.setCharacteristic(Characteristic.Name, name);
-    this.service.getCharacteristic(Characteristic.LeakDetected)
+    this.service.getCharacteristic(Characteristic.SmokeDetected)
       .onGet(this.getOn.bind(this));
     if (area !== -1) {
       const eventEmitter = this.listener.getChannelEventEmitter(this.area, this.channel);
       eventEmitter.on('update', (contact) => {
         if (this.nc) {
           if (contact) {
-            this.LeakStates.Detected = Characteristic.LeakDetected.LEAK_DETECTED;
+            this.SmokeStates.Detected = Characteristic.SmokeDetected.SMOKE_DETECTED;
           } else {
-            this.LeakStates.Detected = Characteristic.LeakDetected.LEAK_NOT_DETECTED;
+            this.SmokeStates.Detected = Characteristic.SmokeDetected.SMOKE_NOT_DETECTED;
           }
         } else {
           if (contact) {
-            this.LeakStates.Detected = Characteristic.LeakDetected.LEAK_NOT_DETECTED;
+            this.SmokeStates.Detected = Characteristic.SmokeDetected.SMOKE_NOT_DETECTED;
           } else {
-            this.LeakStates.Detected = Characteristic.LeakDetected.LEAK_DETECTED;
+            this.SmokeStates.Detected = Characteristic.SmokeDetected.SMOKE_DETECTED;
           }
         }
-        this.service.getCharacteristic(Characteristic.ContactSensorState).updateValue(this.LeakStates.Detected);
-        if (this.LeakStates.Detected ===
-            Characteristic.LeakDetected.LEAK_DETECTED) {
-          this.platform.log.debug(this.name + ' has detected leak');
+        this.service.getCharacteristic(Characteristic.SmokeDetected).updateValue(this.SmokeStates.Detected);
+        if (this.SmokeStates.Detected ===
+          Characteristic.SmokeDetected.SMOKE_DETECTED) {
+          this.platform.log.debug(this.name + ' has detected smoke');
         }
       });
 
@@ -65,6 +65,6 @@ export class LeakSensor implements ABCDevice {
   }
 
   async getOn(): Promise<CharacteristicValue> {
-    return this.LeakStates.Detected;
+    return this.SmokeStates.Detected;
   }
 }

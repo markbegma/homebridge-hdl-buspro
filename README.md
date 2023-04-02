@@ -11,11 +11,11 @@
 * Relay Lightbulbs
 * Relay Dimmable Lightbulbs
 * Sensors 8 in 1 (dry contacts not supported yet)
-* Dry contact relays (leak and contact sensors)
+* Dry contact relays
 * Relay locks
-* Relay curtains (including custon valve usage)
+* Relay curtains (including custom valve usage)
 
-Heaters and security systems will be supported in later versions, as well as more types of dry contact sensors.
+Heaters and security systems may be supported in later versions.
 
 ## Installation
 
@@ -138,8 +138,10 @@ Specify what your dry contact sensor does
   - Available values:
     - *"leaksensor"* - leak sensor
     - *"contactsensor"* - contact sensor
+    - *"smokesensor"* - smoke sensor
+    - *"occupancysensor"* - occupancy sensor
 - `lock_timeout` [required]
-An option to close lock automatically after specified time. Default is 0, which is usual lock behavior
+An option to close lock automatically after specified time in seconds. Default is 0, which is usual lock behavior
 - `duration` [required]
 HDL can only control partial curtain opening by timer, so you have to calibrate how long it takes to fully open curtain, put this value to HDL and copy it here to avoid misalignment
 - `curtains_precision` [required]

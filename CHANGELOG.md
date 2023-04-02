@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.2.0 (2023-04-02)
+
+* [+] Massive codestyle rehaul
+* [+] Added support for more DryContact sensor types
+* [+] Lights' stati are now infered after reload
+* [+] Fixed dimmer brightness bug
+* [+] Massively reduced traffic of status response by making it relay-wide
+* [+] Fixed security issues
+* [+] More log details and handlers for errors
+* [?] Angular interface still not fixed because I have no idea how it works
+
 ## 2.1.2 (2021-04-30)
 
 * [+] Fixed a relay valve status bug
