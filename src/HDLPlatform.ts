@@ -67,7 +67,7 @@ export class HDLBusproHomebridge implements DynamicPlatformPlugin {
       return;
     }
     const { deviceClass, listener, uniqueArgs, idEnding } = deviceTypeConfig;
-    let uniqueIDSuffix = `.${device.device_address}`;
+    let uniqueIDSuffix = String(device.device_address);
     if (idEnding(device)) {
       uniqueIDSuffix = `${uniqueIDSuffix}.${idEnding(device)}`;
     }

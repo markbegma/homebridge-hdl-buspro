@@ -5,7 +5,7 @@ import { HDLBusproHomebridge } from './HDLPlatform';
 import { RelayListener } from './RelayLightbulb';
 import { ABCDevice } from './ABC';
 
-export class RelayDimmableLightbulb extends ABCDevice {
+export class RelayDimmableLightbulb implements ABCDevice {
   private service: Service;
   private RelayDimmableLightbulbStates = {
     On: false,
@@ -21,7 +21,6 @@ export class RelayDimmableLightbulb extends ABCDevice {
     private readonly listener: RelayListener,
     private readonly channel: number,
   ) {
-    super();
     const Service = this.platform.Service;
     const Characteristic = this.platform.Characteristic;
     this.accessory.getService(Service.AccessoryInformation)!
