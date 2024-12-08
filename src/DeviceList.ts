@@ -11,6 +11,7 @@ import { OccupancySensor } from './OccupancySensor';
 import { ContactSensor, DryListener } from './ContactSensor';
 import { RelayCurtains, RelayCurtainListener } from './RelayCurtains';
 import { RelayCurtainValve } from './RelayCurtainValve';
+import { RelayFan } from './RelayFan';
 
 export interface DeviceType<T extends ABCDevice, U extends ABCListener> {
   deviceClass: new (...args: any[]) => T;
@@ -29,6 +30,13 @@ export const deviceTypeMap: {[key: string]: DeviceType<any, any>} = {
   },
   'relaydimmablelightbulb': {
     deviceClass: RelayDimmableLightbulb,
+    listener: RelayListener,
+    uniqueArgs: (config) => [config.channel],
+    idEnding: (config) => `${config.channel}`,
+  },
+  // Fan support
+  'relayfan': {
+    deviceClass: RelayFan,
     listener: RelayListener,
     uniqueArgs: (config) => [config.channel],
     idEnding: (config) => `${config.channel}`,
