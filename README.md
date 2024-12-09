@@ -13,6 +13,7 @@
 * Sensors 8 in 1 (dry contacts not supported yet)
 * Dry contact relays
 * Relay locks
+* Relay fans
 * Relay curtains (including custom valve usage)
 
 Heaters and security systems may be supported in later versions.
@@ -124,6 +125,7 @@ Specify the type of device
     - *"relaydimmablelightbulb"* - relay dimmable lights
     - *"sensor8in1"* - multisensor
     - *"relaylock"* - custom use of light relay to control a lock
+    - *"relayfan"* - custom use of light relay to control a fan
     - *"drycontact"* - dry contact relay
     - *"relaycurtains"* - relay curtains (have to be calibrated in HDL)
     - *"relaycurtainvalve"* - custom usage of curtains relay to control a water valve
