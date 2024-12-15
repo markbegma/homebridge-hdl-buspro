@@ -2,7 +2,7 @@
   "name": "homebridge-hdl-buspro",
   "displayName": "HDLBuspro",
   "type": "module",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "private": false,
   "description": "Linking the HDL bus into the Homebridge widget",
   "author": "Your Name",
