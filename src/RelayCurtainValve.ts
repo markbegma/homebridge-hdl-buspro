@@ -54,26 +54,26 @@ export class RelayCurtainValve implements ABCDevice {
     const eventEmitter = this.listener.getCurtainEventEmitter(this.channel);
     eventEmitter.on('update', (status) => {
       switch (status) {
-        case this.HDLStop:
-          if (this.wasactive === this.HDLOpening) {
-            this.RelayCurtainValveStates.Active = 1;
-            this.RelayCurtainValveStates.InUse = 1;
-            this.platform.log.debug(this.name + ' is now active');
-          } else if (this.wasactive === this.HDLClosing) {
-            this.RelayCurtainValveStates.Active = 0;
-            this.RelayCurtainValveStates.InUse = 0;
-            this.platform.log.debug(this.name + ' is now inactive');
-          }
-          this.service.getCharacteristic(Characteristic.Active).updateValue(this.RelayCurtainValveStates.Active);
-          this.service.getCharacteristic(Characteristic.InUse).updateValue(this.RelayCurtainValveStates.InUse);
-          this.wasactive = this.HDLStop;
-          break;
-        case this.HDLOpening:
-          this.wasactive = this.HDLOpening;
-          break;
-        case this.HDLClosing:
-          this.wasactive = this.HDLClosing;
-          break;
+      case this.HDLStop:
+        if (this.wasactive === this.HDLOpening) {
+          this.RelayCurtainValveStates.Active = 1;
+          this.RelayCurtainValveStates.InUse = 1;
+          this.platform.log.debug(this.name + ' is now active');
+        } else if (this.wasactive === this.HDLClosing) {
+          this.RelayCurtainValveStates.Active = 0;
+          this.RelayCurtainValveStates.InUse = 0;
+          this.platform.log.debug(this.name + ' is now inactive');
+        }
+        this.service.getCharacteristic(Characteristic.Active).updateValue(this.RelayCurtainValveStates.Active);
+        this.service.getCharacteristic(Characteristic.InUse).updateValue(this.RelayCurtainValveStates.InUse);
+        this.wasactive = this.HDLStop;
+        break;
+      case this.HDLOpening:
+        this.wasactive = this.HDLOpening;
+        break;
+      case this.HDLClosing:
+        this.wasactive = this.HDLClosing;
+        break;
       }
     });
     // status request
@@ -90,16 +90,16 @@ export class RelayCurtainValve implements ABCDevice {
       this.RelayCurtainValveStates.Active = newactive as number;
       let command;
       switch (newactive) {
-        case 0:
-          command = this.HDLClosing;
-          this.platform.log.debug('Commanded a full close for ' + this.name);
-          break;
-        case 1:
-          command = this.HDLOpening;
-          this.platform.log.debug('Commanded a full open for ' + this.name);
-          break;
-        default:
-          break;
+      case 0:
+        command = this.HDLClosing;
+        this.platform.log.debug('Commanded a full close for ' + this.name);
+        break;
+      case 1:
+        command = this.HDLOpening;
+        this.platform.log.debug('Commanded a full open for ' + this.name);
+        break;
+      default:
+        break;
       }
       this.controller.send({
         target: this.device,

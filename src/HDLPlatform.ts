@@ -1,13 +1,30 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from 'homebridge';
-import SmartBus = require('smart-bus');
-import { Bus, Device } from 'smart-bus';
+import { API, Characteristic, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
+import SmartBus, { Bus, Device } from 'smart-bus';
 
-import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
-import { DeviceType, deviceTypeMap } from './DeviceList';
 import { ABCDevice, ABCListener } from './ABC';
+import { DeviceType, deviceTypeMap } from './DeviceList';
+import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 
+
+function buildDevice(
+  platform: HDLBusproHomebridge,
+  accessory: PlatformAccessory | undefined,
+  deviceClass: new (...args: any[]) => ABCDevice,
+  commonArgs: any[],
+  uniqueArgs: any[],
+  uuid: string,
+) {
+  if (accessory) {
+    platform.log.info('Restoring existing accessory from cache:', accessory.displayName);
+  } else {
+    platform.log.info('Adding new accessory:', commonArgs[0]);
+    accessory = new platform.api.platformAccessory(commonArgs[0], uuid);
+    platform.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+  }
+  new deviceClass(platform, accessory, ...commonArgs, ...uniqueArgs);
+}
 export class HDLBusproHomebridge implements DynamicPlatformPlugin {
   public readonly Service: typeof Service = this.api.hap.Service;
   public readonly Characteristic: typeof Characteristic = this.api.hap.Characteristic;
@@ -88,20 +105,3 @@ export class HDLBusproHomebridge implements DynamicPlatformPlugin {
   }
 }
 
-function buildDevice(
-  platform: HDLBusproHomebridge,
-  accessory: PlatformAccessory | undefined,
-  deviceClass: new (...args: any[]) => ABCDevice,
-  commonArgs: any[],
-  uniqueArgs: any[],
-  uuid: string,
-) {
-  if (accessory) {
-    platform.log.info('Restoring existing accessory from cache:', accessory.displayName);
-  } else {
-    platform.log.info('Adding new accessory:', commonArgs[0]);
-    accessory = new platform.api.platformAccessory(commonArgs[0], uuid);
-    platform.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
-  }
-  new deviceClass(platform, accessory, ...commonArgs, ...uniqueArgs);
-}

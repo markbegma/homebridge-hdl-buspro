@@ -64,67 +64,67 @@ export class RelayCurtains implements ABCDevice {
         this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(this.RelayCurtainsStates.CurrentPosition);
       }
       switch (status) {
-        case this.HDLStop:
-          this.RelayCurtainsStates.PositionState = HMBStop;
-          this.service.getCharacteristic(Characteristic.PositionState).updateValue(this.RelayCurtainsStates.PositionState);
-          this.platform.log.debug(this.name + ' reached stop at ' + this.RelayCurtainsStates.CurrentPosition);
-          break;
-        case this.HDLOpening:
-          this.RelayCurtainsStates.PositionState = HMBOpening;
-          this.service.getCharacteristic(Characteristic.PositionState).updateValue(this.RelayCurtainsStates.PositionState);
-          this.postracker_process = setInterval(() => {
-            if (this.RelayCurtainsStates.CurrentPosition < 100) {
-              ++this.RelayCurtainsStates.CurrentPosition;
-              this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(this.RelayCurtainsStates.CurrentPosition);
-            }
-          }, 10 * this.duration);
-          if ((this.RelayCurtainsStates.TargetPosition < this.RelayCurtainsStates.CurrentPosition) || (this.RelayCurtainsStates.TargetPosition === 100)) {
-            this.platform.log.debug('Starting full open of ' + this.name + ' (from ' + this.RelayCurtainsStates.CurrentPosition + ' to ' + this.RelayCurtainsStates.TargetPosition + ')');
-            this.RelayCurtainsStates.TargetPosition = 100;
-            this.service.getCharacteristic(Characteristic.TargetPosition).updateValue(this.RelayCurtainsStates.TargetPosition);
-          } else {
-            this.platform.log.debug('Starting partial open of ' + this.name + ' (from ' + this.RelayCurtainsStates.CurrentPosition + ' to ' + this.RelayCurtainsStates.TargetPosition + ')');
-            const pathtogo = this.RelayCurtainsStates.TargetPosition - this.RelayCurtainsStates.CurrentPosition;
-            clearInterval(this.stopper_process);
-            this.stopper_process = setTimeout(() => {
-              this.controller.send({
-                target: this.device,
-                command: 0xE3E0,
-                data: { curtain: this.channel, status: this.HDLStop },
-              }, false); //not handling this error
-              this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(this.RelayCurtainsStates.CurrentPosition);
-              this.platform.log.debug('Reached partial open position of ' + this.name + ' at ' + this.RelayCurtainsStates.TargetPosition);
-            }, 1000 * (pathtogo / 100) * this.duration);
+      case this.HDLStop:
+        this.RelayCurtainsStates.PositionState = HMBStop;
+        this.service.getCharacteristic(Characteristic.PositionState).updateValue(this.RelayCurtainsStates.PositionState);
+        this.platform.log.debug(this.name + ' reached stop at ' + this.RelayCurtainsStates.CurrentPosition);
+        break;
+      case this.HDLOpening:
+        this.RelayCurtainsStates.PositionState = HMBOpening;
+        this.service.getCharacteristic(Characteristic.PositionState).updateValue(this.RelayCurtainsStates.PositionState);
+        this.postracker_process = setInterval(() => {
+          if (this.RelayCurtainsStates.CurrentPosition < 100) {
+            ++this.RelayCurtainsStates.CurrentPosition;
+            this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(this.RelayCurtainsStates.CurrentPosition);
           }
-          break;
-        case this.HDLClosing:
-          this.RelayCurtainsStates.PositionState = HMBClosing;
-          this.service.getCharacteristic(Characteristic.PositionState).updateValue(this.RelayCurtainsStates.PositionState);
-          this.postracker_process = setInterval(() => {
-            if (this.RelayCurtainsStates.CurrentPosition > 0) {
-              --this.RelayCurtainsStates.CurrentPosition;
-              this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(this.RelayCurtainsStates.CurrentPosition);
-            }
-          }, 10 * this.duration);
-          if ((this.RelayCurtainsStates.TargetPosition > this.RelayCurtainsStates.CurrentPosition) || (this.RelayCurtainsStates.TargetPosition === 0)) {
-            this.platform.log.debug('Starting full close of ' + this.name + ' (from ' + this.RelayCurtainsStates.CurrentPosition + ' to ' + this.RelayCurtainsStates.TargetPosition + ')');
-            this.RelayCurtainsStates.TargetPosition = 0;
-            this.service.getCharacteristic(Characteristic.TargetPosition).updateValue(this.RelayCurtainsStates.TargetPosition);
-          } else {
-            this.platform.log.debug('Starting partial close of ' + this.name + ' (from ' + this.RelayCurtainsStates.CurrentPosition + ' to ' + this.RelayCurtainsStates.TargetPosition + ')');
-            const pathtogo = this.RelayCurtainsStates.CurrentPosition - this.RelayCurtainsStates.TargetPosition;
-            clearInterval(this.stopper_process);
-            this.stopper_process = setTimeout(() => {
-              this.controller.send({
-                target: this.device,
-                command: 0xE3E0,
-                data: { curtain: this.channel, status: this.HDLStop },
-              }, false); //not handling this error
-              this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(this.RelayCurtainsStates.CurrentPosition);
-              this.platform.log.debug('Reached partial close position of ' + this.name + ' at ' + this.RelayCurtainsStates.TargetPosition);
-            }, 1000 * (pathtogo / 100) * this.duration);
+        }, 10 * this.duration);
+        if ((this.RelayCurtainsStates.TargetPosition < this.RelayCurtainsStates.CurrentPosition) || (this.RelayCurtainsStates.TargetPosition === 100)) {
+          this.platform.log.debug('Starting full open of ' + this.name + ' (from ' + this.RelayCurtainsStates.CurrentPosition + ' to ' + this.RelayCurtainsStates.TargetPosition + ')');
+          this.RelayCurtainsStates.TargetPosition = 100;
+          this.service.getCharacteristic(Characteristic.TargetPosition).updateValue(this.RelayCurtainsStates.TargetPosition);
+        } else {
+          this.platform.log.debug('Starting partial open of ' + this.name + ' (from ' + this.RelayCurtainsStates.CurrentPosition + ' to ' + this.RelayCurtainsStates.TargetPosition + ')');
+          const pathtogo = this.RelayCurtainsStates.TargetPosition - this.RelayCurtainsStates.CurrentPosition;
+          clearInterval(this.stopper_process);
+          this.stopper_process = setTimeout(() => {
+            this.controller.send({
+              target: this.device,
+              command: 0xE3E0,
+              data: { curtain: this.channel, status: this.HDLStop },
+            }, false); //not handling this error
+            this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(this.RelayCurtainsStates.CurrentPosition);
+            this.platform.log.debug('Reached partial open position of ' + this.name + ' at ' + this.RelayCurtainsStates.TargetPosition);
+          }, 1000 * (pathtogo / 100) * this.duration);
+        }
+        break;
+      case this.HDLClosing:
+        this.RelayCurtainsStates.PositionState = HMBClosing;
+        this.service.getCharacteristic(Characteristic.PositionState).updateValue(this.RelayCurtainsStates.PositionState);
+        this.postracker_process = setInterval(() => {
+          if (this.RelayCurtainsStates.CurrentPosition > 0) {
+            --this.RelayCurtainsStates.CurrentPosition;
+            this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(this.RelayCurtainsStates.CurrentPosition);
           }
-          break;
+        }, 10 * this.duration);
+        if ((this.RelayCurtainsStates.TargetPosition > this.RelayCurtainsStates.CurrentPosition) || (this.RelayCurtainsStates.TargetPosition === 0)) {
+          this.platform.log.debug('Starting full close of ' + this.name + ' (from ' + this.RelayCurtainsStates.CurrentPosition + ' to ' + this.RelayCurtainsStates.TargetPosition + ')');
+          this.RelayCurtainsStates.TargetPosition = 0;
+          this.service.getCharacteristic(Characteristic.TargetPosition).updateValue(this.RelayCurtainsStates.TargetPosition);
+        } else {
+          this.platform.log.debug('Starting partial close of ' + this.name + ' (from ' + this.RelayCurtainsStates.CurrentPosition + ' to ' + this.RelayCurtainsStates.TargetPosition + ')');
+          const pathtogo = this.RelayCurtainsStates.CurrentPosition - this.RelayCurtainsStates.TargetPosition;
+          clearInterval(this.stopper_process);
+          this.stopper_process = setTimeout(() => {
+            this.controller.send({
+              target: this.device,
+              command: 0xE3E0,
+              data: { curtain: this.channel, status: this.HDLStop },
+            }, false); //not handling this error
+            this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(this.RelayCurtainsStates.CurrentPosition);
+            this.platform.log.debug('Reached partial close position of ' + this.name + ' at ' + this.RelayCurtainsStates.TargetPosition);
+          }, 1000 * (pathtogo / 100) * this.duration);
+        }
+        break;
       }
     });
     // status request
@@ -141,23 +141,23 @@ export class RelayCurtains implements ABCDevice {
     const pathtogo = (targetposition as number) - this.RelayCurtainsStates.CurrentPosition;
     let command;
     switch (targetposition) {
-      case 0:
+    case 0:
+      command = this.HDLClosing;
+      this.platform.log.debug('Commanded a full close for ' + this.name);
+      break;
+    case 100:
+      command = this.HDLOpening;
+      this.platform.log.debug('Commanded a full open for ' + this.name);
+      break;
+    default:
+      if (pathtogo < 0) {
         command = this.HDLClosing;
-        this.platform.log.debug('Commanded a full close for ' + this.name);
-        break;
-      case 100:
+        this.platform.log.debug('Commanded a partial close for ' + this.name);
+      } else if (pathtogo > 0) {
         command = this.HDLOpening;
-        this.platform.log.debug('Commanded a full open for ' + this.name);
-        break;
-      default:
-        if (pathtogo < 0) {
-          command = this.HDLClosing;
-          this.platform.log.debug('Commanded a partial close for ' + this.name);
-        } else if (pathtogo > 0) {
-          command = this.HDLOpening;
-          this.platform.log.debug('Commanded a partial open for ' + this.name);
-        }
-        break;
+        this.platform.log.debug('Commanded a partial open for ' + this.name);
+      }
+      break;
     }
     this.controller.send({
       target: this.device,
